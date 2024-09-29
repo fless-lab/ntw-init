@@ -1,10 +1,14 @@
-import { Response } from 'express';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { Request, NextFunction, Response } from 'express';
 import { ApiResponse } from '..';
 import { ErrorResponse } from './response';
 
 export const GlobalErrorHandler = (
   err: Error | ErrorResponse,
+  req: Request,
   res: Response,
+  next: NextFunction,
 ): void => {
   const isErrorResponse = err instanceof ErrorResponse;
   const error = isErrorResponse
