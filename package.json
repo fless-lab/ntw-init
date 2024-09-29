@@ -1,6 +1,6 @@
 {
   "name": "ntw-init",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A starter project for Node.js, Express, MongoDB, TypeScript, and more.",
   "main": "build/server.js",
   "scripts": {
