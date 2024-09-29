@@ -67,9 +67,9 @@ export class LoggerService {
     }
   }
 
-  file(filename: string, content: string): void {
+  file(filename: string, content: string | object | any): void {
     const logsDir = path.resolve('logs', 'browser');
-    const filePath = path.join(logsDir, filename);
+    const filePath = path.join(logsDir, `${filename}.log`);
 
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
