@@ -1,36 +1,41 @@
 import Redis from 'ioredis';
-import { config } from '../../../config';
 
 let redisClient: Redis | null = null;
 
 function init(): void {
-  redisClient = new Redis({
-    port: config.redis.port, // Redis port from config
-    host: config.redis.host, // Redis host from config
-  });
+  if (!global.REDIS) {
+    redisClient = new Redis({
+      port: CONFIG.redis.port,
+      host: CONFIG.redis.host,
+    });
 
-  redisClient.on('connect', () => {
-    console.info('Client connected to Redis...');
-  });
+    redisClient.on('connect', () => {
+      LOGGER.info('Client connected to Redis...');
+    });
 
-  redisClient.on('ready', () => {
-    console.info('Client connected to Redis and ready to use...');
-  });
+    redisClient.on('ready', () => {
+      LOGGER.info('Client connected to Redis and ready to use...');
+    });
 
-  redisClient.on('error', (err) => {
-    console.error(err.message);
-  });
+    redisClient.on('error', (err) => {
+      LOGGER.error(err.message);
+    });
 
-  redisClient.on('end', () => {
-    console.warn('Client disconnected from Redis');
-  });
+    redisClient.on('end', () => {
+      LOGGER.warn('Client disconnected from Redis');
+    });
 
-  process.on('SIGINT', () => {
-    console.log('On client quit');
-    if (redisClient) {
-      redisClient.quit();
-    }
-  });
+    process.on('SIGINT', () => {
+      LOGGER.info('On client quit');
+      if (redisClient) {
+        redisClient.quit();
+      }
+    });
+
+    global.REDIS = redisClient;
+  } else {
+    redisClient = REDIS;
+  }
 }
 
 function getClient(): Redis {
@@ -43,9 +48,10 @@ function getClient(): Redis {
 async function close(): Promise<void> {
   if (redisClient) {
     await redisClient.quit();
-    console.warn('Redis connection is disconnected.');
+    LOGGER.warn('Redis connection is disconnected.');
+    // global.REDIS = null;
   } else {
-    console.warn('No Redis connection found to close.');
+    LOGGER.warn('No Redis connection found to close.');
   }
 }
 

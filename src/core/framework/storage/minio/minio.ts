@@ -1,5 +1,4 @@
 import { Client } from 'minio';
-import { config } from '../../../config';
 
 let minioClient: Client | null = null;
 
@@ -23,9 +22,9 @@ function connect(
 function init(): Client {
   if (!minioClient) {
     minioClient = connect(
-      config.minio.endpoint,
-      config.minio.accessKey,
-      config.minio.secretKey,
+      CONFIG.minio.endpoint,
+      CONFIG.minio.accessKey,
+      CONFIG.minio.secretKey,
     );
   }
   return minioClient;

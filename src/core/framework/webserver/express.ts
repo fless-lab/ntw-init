@@ -5,30 +5,32 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import initializeViewEngine from '../view-engine';
 import { initializeSessionAndFlash } from '../session-flash';
-import {
-  apiRateLimiter,
-  clientAuthentication,
-  GlobalErrorHandler,
-  NotFoundHandler,
-} from '../../../common/shared';
-import { default as AllRoutes } from '../../../common/global-router';
-import { config } from '../../config';
+
 import { helmetCSPConfig } from '../../constants';
 
-const app = express();
-const morganEnv = config.runningProd ? 'combined' : 'dev';
+import { AppModule } from '../../../modules';
+import { GlobalErrorHandler, NotFoundHandler } from '../../../handlers';
 
-// Express configuration
+const app = express();
+const AllRoutes = AppModule.getRouter();
+
+// App middlewares
+const AuthMiddlewares = AppModule.fromAuthzModule().authentication.middlewares;
+const SharedMiddlewares = AppModule.fromSharedModule().middlewares;
+
+const morganEnv = CONFIG.runningProd ? 'combined' : 'dev';
+
+// Express middlewares
 app.use(cors());
-app.use(helmet()); // Use Helmet to add various security headers
+app.use(helmet());
 app.use(helmetCSPConfig);
-app.use(helmet.frameguard({ action: 'deny' })); // Prevent the app from being displayed in an iframe
-app.use(helmet.xssFilter()); // Protect against XSS attacks
-app.use(helmet.noSniff()); // Prevent MIME type sniffing
-app.use(helmet.ieNoOpen()); // Prevent IE from executing downloads
+app.use(helmet.frameguard({ action: 'deny' }));
+app.use(helmet.xssFilter());
+app.use(helmet.noSniff());
+app.use(helmet.ieNoOpen());
 app.use(morgan(morganEnv));
 app.use(express.json());
-app.disable('x-powered-by'); // Disable X-Powered-By header
+app.disable('x-powered-by');
 
 // Initialize Session and Flash
 initializeSessionAndFlash(app);
@@ -37,10 +39,10 @@ initializeSessionAndFlash(app);
 initializeViewEngine(app);
 
 // Client authentication middleware
-app.use(clientAuthentication);
+app.use(AuthMiddlewares.enableClientAuth);
 
 // Client authentication middleware
-app.use(apiRateLimiter);
+app.use(SharedMiddlewares.enameRateLimiter);
 
 // API Routes
 app.use('/api/v1', AllRoutes);

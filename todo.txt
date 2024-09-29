@@ -1,1 +1,0 @@
-Use alias instead of simple paths

@@ -1,21 +1,28 @@
-process.on('uncaughtException', function (err) {
-  console.error('Uncaught Exception:', err);
-});
+import './types/global';
 
+// Import global variables first
+import { GlobalInitializer } from './helpers/init-globals';
+
+// Initialize global variables
+GlobalInitializer.init();
+
+// Import other modules
 import { initServices } from './helpers';
 import { WebServer } from './core/framework';
-import { logger } from './common/shared';
-import { config } from './core/config';
+
+process.on('uncaughtException', function (err) {
+  LOGGER.error('Uncaught Exception:', err);
+});
 
 async function startServer() {
   try {
     await initServices();
-    const app = WebServer.app;
-    app.listen(config.port, () => {
-      logger.info(`Server running on http://localhost:${config.port}`);
+    global.APP = WebServer.app;
+    APP.listen(CONFIG.port, () => {
+      LOGGER.info(`Server running on port ${CONFIG.port}`);
     });
   } catch (error) {
-    logger.error('Failed to initialize services', error as any);
+    LOGGER.error('Failed to initialize services', error as any);
   }
 }
 

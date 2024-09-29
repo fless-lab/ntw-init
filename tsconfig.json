@@ -10,10 +10,12 @@
     "rootDir": "./src",
     "typeRoots": [
       "./node_modules/@types",
-      "./src/types"
-    ]
+      "./src/types",
+      "./types"
+    ],
+    "types": ["node"],
+    "moduleResolution": "node"
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts", "src/types/global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
-

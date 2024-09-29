@@ -1,22 +1,20 @@
 import { Application } from 'express';
-import { config } from '../../config';
-import { logger } from '../../../common/shared';
 
 const initializeViewEngine = async (app: Application): Promise<void> => {
-  const viewEngine = config.defaultViewEngine;
+  const viewEngine = CONFIG.defaultViewEngine;
 
-  if (!config.viewEngines.includes(viewEngine)) {
+  if (!CONFIG.viewEngines.includes(viewEngine)) {
     throw new Error(
-      `View engine ${viewEngine} is not supported. Please choose one of the following: ${config.viewEngines.join(', ')}.`,
+      `View engine ${viewEngine} is not supported. Please choose one of the following: ${CONFIG.viewEngines.join(', ')}.`,
     );
   }
 
   try {
     const viewEngineModule = await import(`./${viewEngine}`);
     viewEngineModule.default(app);
-    logger.info(`${viewEngine} view engine initialized.`);
+    LOGGER.info(`${viewEngine} view engine initialized.`);
   } catch (error) {
-    logger.error(
+    LOGGER.error(
       `Failed to initialize ${viewEngine} view engine.`,
       error as Error,
     );

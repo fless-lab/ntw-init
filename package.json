@@ -1,7 +1,7 @@
 {
-  "name": "node-ts-starter",
+  "name": "ntw-init",
   "version": "1.0.0",
-  "description": "A simple and lightweight nodejs boilerplate using typescript",
+  "description": "A starter project for Node.js, Express, MongoDB, TypeScript, and more.",
   "main": "build/server.js",
   "scripts": {
     "build": "npx tsc -p .",
@@ -11,7 +11,8 @@
     "lint": "eslint 'src/**/*.{js,ts}'",
     "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
     "format": "prettier --write 'src/**/*.{js,ts,json,css,md,html,pug}'",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "docker:launch": "bash ./bin/start.sh"
   },
   "lint-staged": {
     "src/**/*.{js,ts,tsx}": [
@@ -79,10 +80,8 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.7",
     "nodemon": "^3.1.3",
-    "postcss": "^8.4.38",
     "prettier": "^3.3.2",
     "prettier-plugin-pug": "^1.0.0-alpha.8",
-    "tailwindcss": "^3.4.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.4"
   }
