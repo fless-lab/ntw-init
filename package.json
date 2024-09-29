@@ -12,7 +12,8 @@
     "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
     "format": "prettier --write 'src/**/*.{js,ts,json,css,md,html,pug}'",
     "prepare": "husky install",
-    "docker:launch": "bash ./bin/start.sh"
+    "docker:launch": "bash ./bin/start.sh",
+    "docker:launch:prod": "bash ./bin/start.sh --prod"
   },
   "lint-staged": {
     "src/**/*.{js,ts,tsx}": [
