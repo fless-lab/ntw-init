@@ -42,7 +42,7 @@ initializeViewEngine(app);
 app.use(AuthMiddlewares.enableClientAuth);
 
 // Client authentication middleware
-app.use(SharedMiddlewares.enameRateLimiter);
+app.use(SharedMiddlewares.enableRateLimiter);
 
 // API Routes
 app.use('/api/v1', AllRoutes);

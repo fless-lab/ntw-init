@@ -8,7 +8,7 @@ export const SharedModule = {
   services: {},
   middlewares: {
     bruteForce: bruteForceMiddleware,
-    enameRateLimiter: apiRateLimiter,
+    enableRateLimiter: apiRateLimiter,
     validate: validateRequest,
   },
 };
