@@ -1,8 +1,5 @@
 import { Router } from 'express';
-// import { AppRoutes } from '../../apps/app.routes';
-// import { AuthRoutes } from '../../apps/auth.routes';
-// import { OTPRoutes } from '../../apps/otp.routes';
-// import { UserRoutes } from '../../apps/user.routes';
+import { TodoRoutes } from '../../apps';
 
 export class RouterModule {
   private static router: Router;
@@ -16,9 +13,6 @@ export class RouterModule {
   }
 
   private static initializeRoutes(): void {
-    // RouterModule.router.use('/', AppRoutes);
-    // RouterModule.router.use('/users', UserRoutes);
-    // RouterModule.router.use('/otp', OTPRoutes);
-    // RouterModule.router.use('/auth', AuthRoutes);
+    RouterModule.router.use('/todos', TodoRoutes);
   }
 }
