@@ -1,4 +1,5 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------
+// init: Initialize a new feature
 // build: Changes that affect the build system or external dependencies
 // chore: Used for miscellaneous changes that don't affect the main codebase (e.g., configuring development tools, setting up project-specific settings)
 // ci: Changes to our CI configuration files and scripts
@@ -40,6 +41,7 @@ module.exports = {
             'test',
             'translation',
             'sec',
+            'init',
           ];
 
           if (!type || !subject) {
