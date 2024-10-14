@@ -1,10 +1,8 @@
 import { Model } from 'mongoose';
 import { ITodoModel } from '../types';
-// import { AppModule } from '../../../modules';
-// TODO: Use AppModule instead of direct BaseRepository import
-import { BaseRepository } from '../../../modules/entity-core/repositories';
+import { EntityCoreModule } from 'modules/entity-core';
 
-// const { BaseRepository } = AppModule.fromEntityCoreModule();
+const { BaseRepository } = EntityCoreModule.getChildren();
 
 export class TodoRepository extends BaseRepository<ITodoModel> {
   constructor(model: Model<ITodoModel>) {

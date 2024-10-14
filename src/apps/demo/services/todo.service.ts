@@ -1,12 +1,11 @@
 import { ITodoModel } from '../types';
-import { AppModule } from '../../../modules';
 import { TodoRepository } from '../repositories';
 import { TodoModel } from '../models';
-import { ErrorResponseType, SuccessResponseType } from '../../../types';
-import { parseSortParam } from '../../../helpers';
-import { BaseService } from '../../../modules/entity-core/services';
-console.log('app module in todo service', AppModule);
-// const { BaseService } = AppModule.fromEntityCoreModule();
+import { EntityCoreModule } from 'modules/entity-core';
+import { parseSortParam } from 'helpers';
+import { SuccessResponseType, ErrorResponseType } from 'types';
+
+const { BaseService } = EntityCoreModule.getChildren();
 
 class TodoService extends BaseService<ITodoModel, TodoRepository> {
   constructor() {

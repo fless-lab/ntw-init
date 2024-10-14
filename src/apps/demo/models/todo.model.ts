@@ -1,13 +1,9 @@
-// import { AppModule } from '../../../modules';
-// TODO: Use AppModule instead of direct BaseRepository import
-import {
-  BaseModel,
-  createBaseSchema,
-} from '../../../modules/entity-core/models';
+import { EntityCoreModule } from 'modules/entity-core';
 import { ITodoModel } from '../types';
 
+const { createBaseSchema, BaseModel } = EntityCoreModule.getChildren();
+
 const TODO_MODEL_NAME = 'Todo';
-// const { BaseModel, createBaseSchema } = AppModule.fromEntityCoreModule();
 
 const todoSchema = createBaseSchema<ITodoModel>(
   {
