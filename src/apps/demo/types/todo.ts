@@ -1,5 +1,5 @@
 import { Document, Types } from 'mongoose';
-import { IBaseModel } from '../../../types';
+import { IBaseModel } from 'types';
 
 export type TodoPriority = 'low' | 'medium' | 'high';
 

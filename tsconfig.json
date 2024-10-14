@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "target": "es2016",
     "module": "commonjs",
     "strict": true,
@@ -14,7 +15,19 @@
       "./types"
     ],
     "types": ["node"],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@types/*": ["./src/types/*"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@modules/*": ["./src/modules/*"],
+      "@entity-core/*": ["./src/modules/entity-core/*"],
+      "@framework/*": ["./src/core/framework/*"],
+      "@core/*": ["./src/core/*"],
+      "@handlers/*": ["./src/handlers/*"],
+      "@features/*": ["./src/modules/features/*"],
+      "@apps/*": ["/src/apps/*"],
+    }
   },
   "include": ["src/**/*.ts", "src/types/**/*.d.ts", "src/types/global.d.ts"],
   "exclude": ["node_modules", "dist"]

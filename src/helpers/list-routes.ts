@@ -1,7 +1,7 @@
 import { Application } from 'express';
 import expressListEndpoints from 'express-list-endpoints';
 
-function listRoutes(app: Application) {
+function listRoutes(app: Application = APP) {
   const routes = expressListEndpoints(app);
   return routes.map((route) => ({
     path: route.path,
