@@ -27,6 +27,7 @@
       "@handlers/*": ["./src/handlers/*"],
       "@features/*": ["./src/modules/features/*"],
       "@apps/*": ["/src/apps/*"],
+      "@templates/*": ["/src/templates/*"],
     }
   },
   "include": ["src/**/*.ts", "src/types/**/*.d.ts", "src/types/global.d.ts"],

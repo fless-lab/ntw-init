@@ -1,6 +1,6 @@
 import { Application } from 'express';
 
-const initializeViewEngine = async (app: Application): Promise<void> => {
+export const initializeViewEngine = async (app: Application): Promise<void> => {
   const viewEngine = CONFIG.defaultViewEngine;
 
   if (!CONFIG.viewEngines.includes(viewEngine)) {
@@ -21,5 +21,3 @@ const initializeViewEngine = async (app: Application): Promise<void> => {
     throw new Error(`View engine ${viewEngine} not supported.`);
   }
 };
-
-export default initializeViewEngine;

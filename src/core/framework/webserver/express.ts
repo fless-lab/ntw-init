@@ -3,13 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import initializeViewEngine from '../view-engine';
-import { initializeSessionAndFlash } from '../session-flash';
 
-import { helmetCSPConfig } from '../../constants';
-
-import { AppModule } from '../../../modules';
-import { GlobalErrorHandler, NotFoundHandler } from '../../../handlers';
+import { NotFoundHandler, GlobalErrorHandler } from 'handlers';
+import { AppModule } from 'modules';
+import { initializeSessionAndFlash, initializeViewEngine } from '..';
+import { helmetCSPConfig } from 'core/constants';
 
 const app = express();
 const AllRoutes = AppModule.getRouter();
