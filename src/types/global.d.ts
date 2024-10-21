@@ -1,7 +1,6 @@
 /* eslint-disable no-var */
-
-import { LoggerService } from '../modules/shared/logger';
-import { AsyncStorageService } from '../modules/shared/localstorage';
+import { LoggerService } from '@nodesandbox/logger';
+import { AsyncStorageService } from '@nodesandbox/async-storage';
 import { Config } from '../core/config';
 import Redis from 'ioredis';
 import { Application } from 'express';

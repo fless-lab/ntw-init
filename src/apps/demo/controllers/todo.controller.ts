@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
 import { TodoService } from '../services';
-import { ErrorResponseType } from 'types';
-import { ApiResponse } from 'handlers';
+import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
 
 /**
  * Controller to handle the operations related to the Todo resource.

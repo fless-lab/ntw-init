@@ -1,8 +1,11 @@
 import { Document } from 'mongoose';
 import { BaseRepository } from '../repositories';
-import { ErrorResponse } from '../../../handlers';
 import { escapeRegex, slugify } from '../../../helpers';
-import { ErrorResponseType, SuccessResponseType } from '../../../types';
+import {
+  ErrorResponse,
+  ErrorResponseType,
+  SuccessResponseType,
+} from '@nodesandbox/response-kit';
 
 export class BaseService<T extends Document, R extends BaseRepository<T>> {
   protected repository: R;

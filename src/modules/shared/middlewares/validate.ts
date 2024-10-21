@@ -1,6 +1,6 @@
+import { ApiResponse, ErrorResponse } from '@nodesandbox/response-kit';
 import { Request, Response, NextFunction } from 'express';
 import { ObjectSchema } from 'joi';
-import { ApiResponse, ErrorResponse } from '../../../handlers';
 
 export const validateRequest = (schema: ObjectSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {

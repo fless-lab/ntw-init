@@ -3,7 +3,10 @@ import { TodoRepository } from '../repositories';
 import { TodoModel } from '../models';
 import { EntityCoreModule } from 'modules/entity-core';
 import { parseSortParam } from 'helpers';
-import { SuccessResponseType, ErrorResponseType } from 'types';
+import {
+  ErrorResponseType,
+  SuccessResponseType,
+} from '@nodesandbox/response-kit';
 
 const { BaseService } = EntityCoreModule.getChildren();
 
