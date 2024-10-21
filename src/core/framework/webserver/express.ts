@@ -4,10 +4,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import { NotFoundHandler, GlobalErrorHandler } from 'handlers';
 import { AppModule } from 'modules';
 import { initializeSessionAndFlash, initializeViewEngine } from '..';
 import { helmetCSPConfig } from 'core/constants';
+import { GlobalErrorHandler, NotFoundHandler } from '@nodesandbox/response-kit';
 
 const app = express();
 const AllRoutes = AppModule.getRouter();

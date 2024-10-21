@@ -1,6 +1,6 @@
 import { ConfigService } from '../core/config';
-import { AsyncStorageService } from '../modules/shared/localstorage';
-import { LoggerService } from '../modules/shared/logger';
+import { LoggerService } from '@nodesandbox/logger';
+import { AsyncStorageService } from '@nodesandbox/async-storage';
 
 export class GlobalInitializer {
   public static init() {

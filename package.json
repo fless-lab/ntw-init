@@ -47,6 +47,9 @@
   "author": "Abdou-Raouf ATARMLA",
   "license": "ISC",
   "dependencies": {
+    "@nodesandbox/async-storage": "^0.1.1",
+    "@nodesandbox/logger": "^0.1.2",
+    "@nodesandbox/response-kit": "^0.1.1",
     "@types/connect-flash": "^0.0.40",
     "@types/express-session": "^1.18.0",
     "bcrypt": "^5.1.1",
