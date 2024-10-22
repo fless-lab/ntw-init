@@ -1,14 +1,12 @@
 import { ITodoModel } from '../types';
 import { TodoRepository } from '../repositories';
 import { TodoModel } from '../models';
-import { EntityCoreModule } from 'modules/entity-core';
 import { parseSortParam } from 'helpers';
 import {
   ErrorResponseType,
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
-
-const { BaseService } = EntityCoreModule.getChildren();
+import { BaseService } from '@nodesandbox/repo-framework';
 
 class TodoService extends BaseService<ITodoModel, TodoRepository> {
   constructor() {
@@ -56,7 +54,6 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
     // Parse sorting parameter using helper function
     const sortObject = sort ? parseSortParam(sort) : {};
 
-    console.log('here sort object', sortObject);
     // Call the base service findAll method with the constructed query
     return this.findAll({
       query,
