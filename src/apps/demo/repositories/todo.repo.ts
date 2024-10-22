@@ -1,8 +1,6 @@
 import { Model } from 'mongoose';
 import { ITodoModel } from '../types';
-import { EntityCoreModule } from 'modules/entity-core';
-
-const { BaseRepository } = EntityCoreModule.getChildren();
+import { BaseRepository } from '@nodesandbox/repo-framework';
 
 export class TodoRepository extends BaseRepository<ITodoModel> {
   constructor(model: Model<ITodoModel>) {

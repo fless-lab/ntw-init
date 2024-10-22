@@ -1,7 +1,5 @@
-import { EntityCoreModule } from 'modules/entity-core';
+import { BaseModel, createBaseSchema } from '@nodesandbox/repo-framework';
 import { ITodoModel } from '../types';
-
-const { createBaseSchema, BaseModel } = EntityCoreModule.getChildren();
 
 const TODO_MODEL_NAME = 'Todo';
 
