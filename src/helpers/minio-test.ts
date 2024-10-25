@@ -1,4 +1,4 @@
-import { S3 } from '../core/framework';
+import { S3 } from 'core/framework';
 
 async function testMinioConnection(): Promise<void> {
   try {
