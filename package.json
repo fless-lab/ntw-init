@@ -7,13 +7,17 @@
     "build": "npx tsc -p .",
     "start:prod": "node .",
     "start": "npx nodemon src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint 'src/**/*.{js,ts}'",
     "lint:fix": "eslint 'src/**/*.{js,ts}' --fix",
     "format": "prettier --write 'src/**/*.{js,ts,json,css,md,html,pug}'",
     "prepare": "husky install",
     "docker:launch": "bash ./bin/start.sh",
-    "docker:launch:prod": "bash ./bin/start.sh --prod"
+    "docker:launch:prod": "bash ./bin/start.sh --prod",
+    "test": "jest",
+    "test:dynamic": "ts-node run-test.ts",
+    "test:e2e": "jest tests/e2e",
+    "test:coverage": "jest --coverage",
+    "test:watch": "jest --watch"
   },
   "nodemonConfig": {
     "ignore": [
@@ -85,9 +89,11 @@
     "@types/express": "^4.17.21",
     "@types/express-brute": "^1.0.5",
     "@types/express-brute-mongo": "^0.0.39",
+    "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/nodemailer": "^6.4.15",
+    "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^5.57.1",
     "@typescript-eslint/parser": "^5.57.1",
     "eslint": "^8.56.0",
@@ -97,10 +103,13 @@
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-promise": "^6.2.0",
     "husky": "^9.0.11",
+    "jest": "^29.7.0",
     "lint-staged": "^15.2.7",
     "nodemon": "^3.1.3",
     "prettier": "^3.3.2",
     "prettier-plugin-pug": "^1.0.0-alpha.8",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.4"
   }
