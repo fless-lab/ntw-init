@@ -50,7 +50,7 @@
     "@nodesandbox/async-storage": "^0.1.1",
     "@nodesandbox/logger": "^0.1.2",
     "@nodesandbox/repo-framework": "^0.1.0",
-    "@nodesandbox/response-kit": "^0.1.1",
+    "@nodesandbox/response-kit": "^0.1.4",
     "@types/connect-flash": "^0.0.40",
     "@types/express-session": "^1.18.0",
     "bcrypt": "^5.1.1",
