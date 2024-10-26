@@ -11,7 +11,7 @@ export class DevHelperController {
   ): Promise<void> {
     try {
       const appRoutes = listRoutes();
-      LOGGER.file('app_routes', appRoutes);
+      LOGGER.file('app_routes', JSON.stringify(appRoutes, null, 4));
       res.json({ sucess: true, data: appRoutes });
     } catch (error) {
       ApiResponse.error(res, error as ErrorResponseType); // Handle any errors.
