@@ -1,4 +1,4 @@
-import { DB } from '../core/framework';
+import { DB } from 'core/framework';
 
 export async function testRedisConnection() {
   try {

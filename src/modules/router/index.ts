@@ -1,6 +1,6 @@
 import { TodoRoutes } from 'apps';
 import { Router } from 'express';
-import { DevRoutes } from 'modules/features/dev';
+import { DevRoutes } from 'modules/features';
 
 export class RouterModule {
   private static router: Router;

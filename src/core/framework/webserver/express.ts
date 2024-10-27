@@ -5,7 +5,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import { AppModule } from 'modules';
-import { initializeSessionAndFlash, initializeViewEngine } from '..';
+import {
+  initializeSessionAndFlash,
+  initializeViewEngine,
+} from 'core/framework';
 import { helmetCSPConfig } from 'core/constants';
 import { GlobalErrorHandler, NotFoundHandler } from '@nodesandbox/response-kit';
 

@@ -1,16 +1,15 @@
 /* eslint-disable @typescript-eslint/triple-slash-reference */
-
 /// <reference path="./types/global.d.ts" />
 
 // Import global variables first
-import { GlobalInitializer } from './helpers/init-globals';
+import { GlobalInitializer } from 'helpers/init-globals';
 
 // Initialize global variables
 GlobalInitializer.init();
 
 // Import other modules
-import { initServices } from './helpers';
-import { WebServer } from './core/framework';
+import { initServices } from 'helpers';
+import { WebServer } from 'core/framework';
 
 process.on('uncaughtException', function (err) {
   LOGGER.error('Uncaught Exception:', err);

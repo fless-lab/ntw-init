@@ -1,4 +1,4 @@
-import { ConfigService } from '../core/config';
+import { ConfigService } from 'core/config';
 import { LoggerService } from '@nodesandbox/logger';
 import { AsyncStorageService } from '@nodesandbox/async-storage';
 
