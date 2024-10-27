@@ -18,15 +18,11 @@
     "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"],
+      "@apps/*": ["/src/apps/*"],
+      "@core/*": ["./src/core/*"],
       "@types/*": ["./src/types/*"],
       "@helpers/*": ["./src/helpers/*"],
       "@modules/*": ["./src/modules/*"],
-      "@entity-core/*": ["./src/modules/entity-core/*"],
-      "@framework/*": ["./src/core/framework/*"],
-      "@core/*": ["./src/core/*"],
-      "@handlers/*": ["./src/handlers/*"],
-      "@features/*": ["./src/modules/features/*"],
-      "@apps/*": ["/src/apps/*"],
       "@templates/*": ["/src/templates/*"],
     }
   },
