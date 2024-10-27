@@ -6,7 +6,6 @@ async function connect(uri: string, dbName: string): Promise<void> {
       .connect(uri, { dbName })
       .then(() => {
         global.MONGO_CLIENT = mongoose.connection;
-        LOGGER.info('Mongoose connected to db');
         resolve();
       })
       .catch((err: mongoose.Error) => {
@@ -23,7 +22,7 @@ async function init(
   try {
     if (!global.MONGO_CLIENT) {
       await connect(uri, dbName);
-      LOGGER.info('MongoDB initialized.');
+      LOGGER.info('MongoDB connected - Waiting for test...');
     } else {
       LOGGER.info('MongoDB client already initialized.');
     }

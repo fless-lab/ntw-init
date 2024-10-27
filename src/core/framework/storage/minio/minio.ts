@@ -15,7 +15,6 @@ function connect(
     secretKey,
   });
 
-  console.info('MinIO connected successfully');
   return minioClient;
 }
 
@@ -27,6 +26,7 @@ function init(): Client {
       CONFIG.minio.secretKey,
     );
   }
+  LOGGER.info('Minio connected - Waiting for test...');
   return minioClient;
 }
 

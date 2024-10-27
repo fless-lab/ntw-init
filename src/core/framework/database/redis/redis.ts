@@ -10,11 +10,11 @@ function init(): void {
     });
 
     redisClient.on('connect', () => {
-      LOGGER.info('Client connected to Redis...');
+      LOGGER.info('Redis connected - Waiting for test...');
     });
 
     redisClient.on('ready', () => {
-      LOGGER.info('Client connected to Redis and ready to use...');
+      // LOGGER.info('Client connected to Redis and ready to use...');
     });
 
     redisClient.on('error', (err) => {
