@@ -31,13 +31,13 @@ app.use(helmet.noSniff());
 app.use(helmet.ieNoOpen());
 app.use(morgan(morganEnv));
 app.use(express.json());
-app.disable('x-powered-by');
+app.disable('x-powered-by'); // or helmet.hidePoweredBy()
 
 // Initialize Session and Flash
-initializeSessionAndFlash(app);
+initializeSessionAndFlash;
 
 // Set view engine
-initializeViewEngine(app);
+initializeViewEngine;
 
 // Client authentication middleware
 app.use(AuthMiddlewares.enableClientAuth);
