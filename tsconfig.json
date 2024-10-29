@@ -14,7 +14,7 @@
       "./src/types",
       "./types"
     ],
-    "types": ["node"],
+    "types": ["node", "jest"],
     "moduleResolution": "node",
     "paths": {
       "@/*": ["./src/*"],
@@ -26,6 +26,6 @@
       "@templates/*": ["/src/templates/*"],
     }
   },
-  "include": ["src/**/*.ts", "src/types/**/*.d.ts", "src/types/global.d.ts"],
+  "include": ["src/**/*.ts", "src/types/**/*.d.ts", "src/types/global.d.ts", "src/**/*.spec.ts", "tests/setup.ts"],
   "exclude": ["node_modules", "dist"]
 }

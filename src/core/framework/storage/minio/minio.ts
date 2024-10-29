@@ -40,4 +40,12 @@ function getClient(): Client {
   return minioClient;
 }
 
-export { init, getClient };
+function close(): void {
+  if (minioClient) {
+    minioClient = null;
+  } else {
+    console.warn('⚠️ No MinIO connection to close.');
+  }
+}
+
+export { init, getClient, close };
