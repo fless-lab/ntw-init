@@ -5,7 +5,9 @@ export const clientAuthentication = (
   res: Response,
   next: NextFunction,
 ) => {
-  const clientToken = req.headers['x-client-token'] as string;
+  const options = CONFIG.clientAuth;
+
+  const clientToken = req.headers[options.identifier] as string;
 
   if (!clientToken) {
     LOGGER.warn(
@@ -18,8 +20,8 @@ export const clientAuthentication = (
     .toString()
     .split(':');
 
-  const validUser = CONFIG.basicAuthUser;
-  const validPass = CONFIG.basicAuthPass;
+  const validUser = options.basicAuthUser;
+  const validPass = options.basicAuthPass;
 
   if (username === validUser && password === validPass) {
     LOGGER.info(`Client authenticated successfully from IP: ${req.ip}`);

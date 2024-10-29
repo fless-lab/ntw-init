@@ -5,7 +5,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import { AppModule } from 'modules';
-import { initializeSessionAndFlash, initializeViewEngine } from '..';
+import {
+  initializeSessionAndFlash,
+  initializeViewEngine,
+} from 'core/framework';
 import { helmetCSPConfig } from 'core/constants';
 import { GlobalErrorHandler, NotFoundHandler } from '@nodesandbox/response-kit';
 
@@ -28,13 +31,13 @@ app.use(helmet.noSniff());
 app.use(helmet.ieNoOpen());
 app.use(morgan(morganEnv));
 app.use(express.json());
-app.disable('x-powered-by');
+app.disable('x-powered-by'); // or helmet.hidePoweredBy()
 
 // Initialize Session and Flash
-initializeSessionAndFlash(app);
+initializeSessionAndFlash;
 
 // Set view engine
-initializeViewEngine(app);
+initializeViewEngine;
 
 // Client authentication middleware
 app.use(AuthMiddlewares.enableClientAuth);

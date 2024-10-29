@@ -6,9 +6,12 @@ export interface Config {
   runningProd: boolean;
   app: string;
   port: number;
-  enableClientAuth: boolean;
-  basicAuthUser: string;
-  basicAuthPass: string;
+  clientAuth: {
+    enableClientAuth: boolean;
+    basicAuthUser: string;
+    basicAuthPass: string;
+    identifier: string;
+  };
   jwt: {
     accessTokenSecret: string;
     refreshTokenSecret: string;
@@ -80,9 +83,12 @@ export class ConfigService {
       runningProd: process.env.NODE_ENV === 'production',
       app: process.env.APP_NAME || 'myapp',
       port: parseInt(process.env.PORT || '9095', 10),
-      enableClientAuth: process.env.ENABLE_CLIENT_AUTH === 'true',
-      basicAuthUser: process.env.BASIC_AUTH_USER || 'admin',
-      basicAuthPass: process.env.BASIC_AUTH_PASS || 'secret',
+      clientAuth: {
+        enableClientAuth: process.env.ENABLE_CLIENT_AUTH === 'true',
+        basicAuthUser: process.env.BASIC_AUTH_USER || 'admin',
+        basicAuthPass: process.env.BASIC_AUTH_PASS || 'secret',
+        identifier: process.env.CLIENT_TOKEN_IDENTIFIER || 'x-client-token',
+      },
       jwt: {
         accessTokenSecret: process.env.ACCESS_TOKEN_SECRET || '',
         refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET || '',
