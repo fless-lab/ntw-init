@@ -13,7 +13,7 @@ function runTests(scope: string, name: string): void {
     process.exit(1);
   }
 
-  const jestConfigPath = path.resolve(__dirname, `src/${scope}/${name}/__tests__/jest.config.ts`);
+  const jestConfigPath = path.resolve(__dirname, `src/${scope}/${name}/jest.config.ts`);
 
   try {
     execSync(`jest --projects ${jestConfigPath}`, { stdio: 'inherit' });
