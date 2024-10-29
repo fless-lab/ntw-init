@@ -1,0 +1,22 @@
+Reorganize folders following domain - application - infrastructure
+
+DOMAIN => 
+    - models
+    - types
+
+
+APPLICATION =>
+    - services
+    - repositories
+    - dtos (joi validators)
+
+INFRASTRUCTURE =>
+    - controllers
+    - routes
+
+
+1- Where to put utilities spécific to each application
+2- How to organize when an application has a multiple controllers, models or services
+3- How to handle the case where a service have to be used in multiple apps...
+   Let's consider the way UserService can be used in an app called user-management and also in the auth app.
+   How can we handle that.
