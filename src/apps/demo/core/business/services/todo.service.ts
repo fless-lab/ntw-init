@@ -1,6 +1,5 @@
-import { ITodoModel } from '../types';
 import { TodoRepository } from '../repositories';
-import { TodoModel } from '../models';
+import { ITodoModel, TodoModel } from 'apps/demo/core/domain';
 import { parseSortParam } from 'helpers';
 import {
   ErrorResponseType,
