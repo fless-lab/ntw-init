@@ -4,3 +4,4 @@ export * from './list-routes';
 export * from './time';
 export * from './string';
 export * from './password-utils';
+export * from './joi-sanitizer';
