@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { ITodoModel } from 'apps/demo/types';
+import { TodoRepository } from 'apps/demo/core/business';
+import { ITodoModel } from 'apps/demo/core/domain';
 import { Model } from 'mongoose';
-import { TodoRepository } from '../todo.repo';
 
 // Créer un mock pour le modèle Mongoose
 const mockTodoModel = {

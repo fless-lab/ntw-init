@@ -1,7 +1,10 @@
+import { sanitize } from './../../../../../helpers/joi-sanitizer';
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Request, Response, NextFunction } from 'express';
 import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
 import { TodoService } from 'apps/demo/core/business';
+import { NextFunction, Request, Response } from 'express';
+import { TodoRequest, TodoRequestSchema } from '../dtos/request';
+import { TodoResponse, TodoResponseSchema } from '../dtos/response';
 
 /**
  * Controller to handle the operations related to the Todo resource.
@@ -19,7 +22,9 @@ export class TodoController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const response = await TodoService.create(req.body);
+      const payload: TodoRequest = await sanitize(req.body, TodoRequestSchema);
+
+      const response = await TodoService.create(payload);
       if (response.success) {
         ApiResponse.success(res, response, 201); // Send a success response with 201 Created status.
       } else {
@@ -42,7 +47,10 @@ export class TodoController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const filters = req.query; // Extract query params for filtering.
+      const filters: TodoResponse = await sanitize(
+        req.query,
+        TodoResponseSchema,
+      ); // Extract query params for filtering.
       const response = await TodoService.getTodos(filters);
 
       if (response.success) {
@@ -51,6 +59,7 @@ export class TodoController {
         throw response;
       }
     } catch (error) {
+      console.log('✖️✖️✖️✖️✖️✖️', error);
       ApiResponse.error(res, error as ErrorResponseType); // Handle any errors.
     }
   }
