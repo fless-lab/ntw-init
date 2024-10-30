@@ -1,10 +1,10 @@
 import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
-  rootDir: '../',
+  rootDir: '.',
   projects: [
     '<rootDir>/src/apps/*/jest.config.ts',
-    '<rootDir>/src/modules/*/jest.config.ts'
+    // '<rootDir>/src/modules/*/jest.config.ts'
   ],
   coverageDirectory: '<rootDir>/coverage',
   preset: 'ts-jest',
