@@ -1,50 +1,40 @@
-import { Client } from 'minio';
+import { Client as MinioClient } from 'minio';
 
-let minioClient: Client | null = null;
+let minioClient: MinioClient | null = null;
 
-function connect(
-  endpoint: string,
-  accessKey: string,
-  secretKey: string,
-): Client {
-  minioClient = new Client({
-    endPoint: endpoint,
-    port: 9000,
-    useSSL: false,
-    accessKey,
-    secretKey,
-  });
+function init(): MinioClient {
+  if (!global.MINIO) {
+    minioClient = new MinioClient({
+      endPoint: CONFIG.minio.host,
+      port: CONFIG.minio.apiPort,
+      useSSL: CONFIG.minio.useSSL,
+      accessKey: CONFIG.minio.accessKey,
+      secretKey: CONFIG.minio.secretKey,
+    });
+
+    LOGGER.info('Minio connected - Waiting for test...');
+    global.MINIO = minioClient;
+  } else {
+    minioClient = global.MINIO;
+  }
 
   return minioClient;
 }
 
-function init(): Client {
-  if (!minioClient) {
-    minioClient = connect(
-      CONFIG.minio.endpoint,
-      CONFIG.minio.accessKey,
-      CONFIG.minio.secretKey,
-    );
+function getClient(): MinioClient {
+  if (!global.MINIO) {
+    throw new Error('Minio client not initialized. Call initMinio() first.');
   }
-  LOGGER.info('Minio connected - Waiting for test...');
-  return minioClient;
-}
-
-function getClient(): Client {
-  if (!minioClient) {
-    const error = new Error('Connection not initialized. Call init() first.');
-    console.error(error);
-    throw error;
-  }
-
-  return minioClient;
+  return global.MINIO;
 }
 
 function close(): void {
-  if (minioClient) {
+  if (global.MINIO) {
     minioClient = null;
+    LOGGER.warn('Minio connection is closed.');
+    // global.MINIO = null;
   } else {
-    console.warn('⚠️ No MinIO connection to close.');
+    LOGGER.warn('No MinIO connection to close.');
   }
 }
 
