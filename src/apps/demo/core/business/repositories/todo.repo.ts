@@ -1,6 +1,6 @@
 import { Model } from 'mongoose';
-import { ITodoModel } from '../types';
 import { BaseRepository } from '@nodesandbox/repo-framework';
+import { ITodoModel } from 'apps/demo/core/domain';
 
 export class TodoRepository extends BaseRepository<ITodoModel> {
   constructor(model: Model<ITodoModel>) {
