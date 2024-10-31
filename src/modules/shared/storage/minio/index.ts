@@ -1,13 +1,21 @@
-export class MinioStorageService {
-  private minioClient: typeof MINIO;
+import { Client } from 'minio';
 
-  constructor() {
-    // Use the existing authenticated global client if available
-    if (typeof MINIO !== 'undefined') {
+export class MinioStorageService {
+  private minioClient: Client;
+
+  constructor(client?: Client) {
+    if (client) {
+      this.minioClient = client;
+    } else if (typeof MINIO !== 'undefined') {
       this.minioClient = MINIO;
     } else {
-      // Optionally, throw an error or create a new client as a fallback
-      throw new Error('Global MINIO client is not defined');
+      this.minioClient = new Client({
+        endPoint: 'localhost',
+        port: 9000,
+        useSSL: false,
+        accessKey: 'YOUR_ACCESS_KEY',
+        secretKey: 'YOUR_SECRET_KEY',
+      });
     }
   }
 
