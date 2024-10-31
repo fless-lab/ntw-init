@@ -30,7 +30,8 @@ export interface Config {
     lifetime: number;
   };
   db: {
-    uri: string;
+    host: string;
+    port: number;
     name: string;
     clientPort: number;
   };
@@ -42,11 +43,12 @@ export interface Config {
     blacklistExpireTime: number;
   };
   minio: {
-    endpoint: string;
+    host: string;
     accessKey: string;
     secretKey: string;
     apiPort: number;
     consolePort: number;
+    useSSL: boolean;
   };
   mail: {
     host: string;
@@ -82,7 +84,7 @@ export class ConfigService {
     this.config = {
       runningProd: process.env.NODE_ENV === 'production',
       app: process.env.APP_NAME || 'myapp',
-      port: parseInt(process.env.PORT || '9095', 10),
+      port: parseInt(process.env.PORT || '5095', 10),
       clientAuth: {
         enableClientAuth: process.env.ENABLE_CLIENT_AUTH === 'true',
         basicAuthUser: process.env.BASIC_AUTH_USER || 'admin',
@@ -107,14 +109,15 @@ export class ConfigService {
         lifetime: parseInt(process.env.BRUTE_FORCE_LIFETIME || '86400', 10), // 1 day in seconds
       },
       db: {
-        uri: process.env.DB_URI || 'mongodb://localhost:27017',
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '27017', 10),
         name: process.env.DB_NAME || 'mydatabase',
-        clientPort: parseInt(process.env.MONGO_CLIENT_PORT || '9005', 10),
+        clientPort: parseInt(process.env.DB_CLIENT_PORT || '5005', 10),
       },
       redis: {
         host: process.env.REDIS_HOST || 'localhost',
         port: parseInt(process.env.REDIS_PORT || '6379', 10),
-        serverPort: parseInt(process.env.REDIS_SERVER_PORT || '9079', 10),
+        serverPort: parseInt(process.env.REDIS_EXT_PORT || '5079', 10),
         tokenExpireTime: parseInt(
           process.env.REDIS_TOKEN_EXPIRE_TIME || '31536000',
           10,
@@ -125,11 +128,12 @@ export class ConfigService {
         ),
       },
       minio: {
-        endpoint: process.env.MINIO_ENDPOINT || 'localhost',
+        host: process.env.MINIO_HOST || 'localhost',
         accessKey: process.env.MINIO_ACCESS_KEY || 'minio-access-key',
         secretKey: process.env.MINIO_SECRET_KEY || 'minio-secret-key',
-        apiPort: parseInt(process.env.MINIO_API_PORT || '9500', 10),
-        consolePort: parseInt(process.env.MINIO_CONSOLE_PORT || '9050', 10),
+        apiPort: parseInt(process.env.MINIO_API_PORT || '9000', 10),
+        consolePort: parseInt(process.env.MINIO_EXT_CONSOLE_PORT || '5050', 10),
+        useSSL: process.env.MINIO_USE_SSL === 'true',
       },
       mail: {
         host:

@@ -1,6 +1,11 @@
 import mongoose, { Connection } from 'mongoose';
 
-async function connect(uri: string, dbName: string): Promise<void> {
+async function connect(
+  host: string,
+  port: number,
+  dbName: string,
+): Promise<void> {
+  const uri = `mongodb://${host}:${port}`;
   return new Promise((resolve, reject) => {
     mongoose
       .connect(uri, { dbName })
@@ -16,12 +21,13 @@ async function connect(uri: string, dbName: string): Promise<void> {
 }
 
 async function init(
-  uri: string = CONFIG.db.uri,
+  host: string = CONFIG.db.host,
+  port: number = CONFIG.db.port,
   dbName: string = CONFIG.db.name,
 ): Promise<void> {
   try {
     if (!global.MONGO_CLIENT) {
-      await connect(uri, dbName);
+      await connect(host, port, dbName);
       LOGGER.info('MongoDB connected - Waiting for test...');
     } else {
       LOGGER.info('MongoDB client already initialized.');
