@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
 import { TodoService } from 'apps/demo/core/business';
+import { MinioService } from 'modules/shared/storage/minio/service/minio.service';
 
 /**
  * Controller to handle the operations related to the Todo resource.

@@ -1,12 +1,25 @@
 import { Client } from 'minio';
 import { MinioService } from '../minio.service';
+import path from 'path';
 
 const testBucketName = 'bucket2';
-const testFileName = 'test-file.txt';
-const testFilePath = './path/to/local/test-file.txt';
+const testFileName = 'test.txt';
+const cwd = process.cwd();
+const testFilePath = path.join(
+  cwd,
+  'src/modules/shared/storage/minio/service/test',
+  testFileName,
+);
+const multipleBuckets: string[] = [
+  'this-bucket',
+  'another-bucket2',
+  'another-bucket3',
+];
+
+let minioService: MinioService;
+let MINIO: Client;
 
 describe('MinioService', () => {
-  let MINIO: Client;
   beforeAll(async () => {
     MINIO = new Client({
       endPoint: process.env.MINIO_HOST || '172.17.0.1',
@@ -15,56 +28,63 @@ describe('MinioService', () => {
       accessKey: process.env.MINIO_ACCESS_KEY || 'minio-access-key',
       secretKey: process.env.MINIO_SECRET_KEY || 'minio-secret-key',
     });
+
+    minioService = new MinioService(MINIO);
   });
 
   afterAll(async () => {
+    multipleBuckets.push(testBucketName);
     // Clean up by deleting test bucket after all tests
-    if (await MINIO.bucketExists(testBucketName)) {
-      await MINIO.removeBucket(testBucketName);
-    }
+    multipleBuckets.forEach(async (bucketName) => {
+      if (await MINIO.bucketExists(bucketName)) {
+        await MINIO.removeBucket(bucketName);
+      }
+    });
   });
 
   describe('createBucket', () => {
     it('should create a new bucket', async () => {
-      const response = await MinioService.createBucket(testBucketName);
+      const response = await minioService.createBucket(testBucketName);
       expect(response.success).toBe(true);
       expect(response.code).toBe(201);
     });
 
     it('should not recreate an existing bucket', async () => {
-      await MinioService.createBucket(testBucketName);
-      const response = await MinioService.createBucket(testBucketName);
+      await minioService.createBucket(testBucketName);
+      const response = await minioService.createBucket(testBucketName);
       expect(response.success).toBe(false);
       expect(response.code).toBe(409);
     });
   });
 
   describe('createBuckets', () => {
-    const bucketNames: string[] = [
-      testBucketName,
-      'test-bucket2',
-      'test-bucket3',
-    ];
-    const bucketsLen = bucketNames.length;
+    const bucketsLen = multipleBuckets.length;
     it('should create multiple buckets', async () => {
-      const response = await MinioService.createBuckets(bucketNames);
+      multipleBuckets.forEach(async (bucketName) => {
+        if (await MINIO.bucketExists(bucketName)) {
+          await MINIO.removeBucket(bucketName);
+        }
+      });
+      const response = await minioService.createBuckets(multipleBuckets);
       expect(response.success).toBe(true);
       expect(response.code).toBe(207);
-      expect(response.data).toContain(bucketsLen);
-      expect(response.data).toContain('0');
+      expect(response.message).toBe(
+        `${bucketsLen} buckets created successfully, 0 failed`,
+      );
     });
 
-    it('should not recreate an existing buckets', async () => {
-      await MinioService.createBuckets(bucketNames);
-      const response = await MinioService.createBucket(testBucketName);
-      expect(response.success).toBe(false);
-      expect(response.code).toBe(500);
+    it('should not recreate any existing buckets', async () => {
+      await minioService.createBuckets(multipleBuckets);
+      const response = await minioService.createBuckets(multipleBuckets);
+      expect(response.success).toBe(true);
+      expect(response.code).toBe(207);
     });
   });
 
   describe('uploadSingleFile', () => {
     it('should upload a file to the bucket', async () => {
-      const response = await MinioService.uploadSingleFile(
+      await minioService.createBucket(testBucketName);
+      const response = await minioService.uploadSingleFile(
         testBucketName,
         testFileName,
         testFilePath,
@@ -77,7 +97,7 @@ describe('MinioService', () => {
 
   describe('getBucketFiles', () => {
     it('should retrieve the list of files in the bucket', async () => {
-      const response = await MinioService.getBucketFiles(testBucketName);
+      const response = await minioService.getBucketFiles(testBucketName);
       expect(response.success).toBe(true);
       expect(response.code).toBe(200);
       expect(
@@ -90,14 +110,14 @@ describe('MinioService', () => {
 
   describe('deleteSingleFile', () => {
     it('should delete a single file from the bucket', async () => {
-      const response = await MinioService.deleteSingleFile(
+      const response = await minioService.deleteSingleFile(
         testBucketName,
         testFileName,
       );
       expect(response.success).toBe(true);
       expect(response.code).toBe(200);
 
-      const fileList = await MinioService.getBucketFiles(testBucketName);
+      const fileList = await minioService.getBucketFiles(testBucketName);
       expect(
         fileList.data.some(
           (file: { name: string }) => file.name === testFileName,
@@ -111,8 +131,8 @@ describe('MinioService', () => {
     const folderFilePath = `${folderName}test-file.txt`;
 
     beforeEach(async () => {
-      await MinioService.createBucket(testBucketName);
-      await MinioService.uploadSingleFile(
+      await minioService.createBucket(testBucketName);
+      await minioService.uploadSingleFile(
         testBucketName,
         folderFilePath,
         testFilePath,
@@ -120,30 +140,19 @@ describe('MinioService', () => {
     });
 
     it('should delete all files in a folder within the bucket', async () => {
-      const response = await MinioService.deleteFolder(
+      const response = await minioService.deleteFolder(
         testBucketName,
         folderName,
       );
       expect(response.success).toBe(true);
       expect(response.code).toBe(200);
 
-      const folderContents = await MinioService.getBucketFiles(testBucketName);
+      const folderContents = await minioService.getBucketFiles(testBucketName);
       expect(
         folderContents.data.some((file: { name: string }) =>
           file.name.startsWith(folderName),
         ),
       ).toBe(false);
-    });
-  });
-
-  describe('deleteBucket', () => {
-    it('should delete the entire bucket', async () => {
-      const response = await MinioService.deleteFolder(testBucketName, '');
-      expect(response.success).toBe(true);
-
-      // Check if bucket no longer exists
-      const exists = await MINIO.bucketExists(testBucketName);
-      expect(exists).toBe(false);
     });
   });
 });

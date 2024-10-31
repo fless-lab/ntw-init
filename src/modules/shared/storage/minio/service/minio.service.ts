@@ -1,13 +1,15 @@
 import { BucketItem } from 'minio';
+import { Client } from 'minio';
 
 export class MinioService {
-  /**
-   * 
-    create a constructor that will ask for a minio instance.. default give out MINIO...
-    In test create an instance of this service and give him the client
-   */
+  client: Client;
+
+  constructor(minioClient: Client = MINIO) {
+    this.client = minioClient;
+  }
+
   // Create a single bucket
-  static async createBucket(bucketName: string): Promise<any> {
+  async createBucket(bucketName: string): Promise<any> {
     try {
       const bucketExists = await this.checkBucket(bucketName);
 
@@ -18,7 +20,7 @@ export class MinioService {
           code: 409,
         };
       } else {
-        await MINIO.makeBucket(bucketName);
+        await this.client.makeBucket(bucketName);
         return {
           success: true,
           message: 'Bucket created successfully',
@@ -37,7 +39,7 @@ export class MinioService {
   }
 
   // Create multiple buckets
-  static async createBuckets(bucketNames: string[]): Promise<any> {
+  async createBuckets(bucketNames: string[]): Promise<any> {
     try {
       const results = await Promise.all(
         bucketNames.map((bucketName) => this.createBucket(bucketName)),
@@ -63,9 +65,9 @@ export class MinioService {
   }
 
   // Check if a bucket exists
-  static async checkBucket(bucketName: string): Promise<boolean> {
+  async checkBucket(bucketName: string): Promise<boolean> {
     try {
-      const bucketExists = await MINIO.bucketExists(bucketName);
+      const bucketExists = await this.client.bucketExists(bucketName);
       return bucketExists;
     } catch {
       return false;
@@ -73,18 +75,19 @@ export class MinioService {
   }
 
   // Upload a single file to a bucket and return its URL
-  static async uploadSingleFile(
+  async uploadSingleFile(
     bucketName: string,
     fileName: string,
     filePath: string,
   ): Promise<any> {
     try {
-      await MINIO.fPutObject(bucketName, fileName, filePath);
-      const fileUrl = await MINIO.presignedGetObject(
+      await this.client.fPutObject(bucketName, fileName, filePath);
+      const fileUrl = await this.client.presignedGetObject(
         bucketName,
         fileName,
         24 * 60 * 60,
       );
+
       return {
         success: true,
         message: 'File uploaded successfully',
@@ -101,14 +104,14 @@ export class MinioService {
     }
   }
 
-  static async uploadSingleFile2(
+  async uploadSingleFile2(
     bucket: string,
     fileName: string,
     filePath: string,
     type = 'image/jpeg',
   ): Promise<any> {
     try {
-      await MINIO.fPutObject(bucket, fileName, filePath, {
+      await this.client.fPutObject(bucket, fileName, filePath, {
         'Content-Type': type,
       });
 
@@ -121,15 +124,15 @@ export class MinioService {
   }
 
   // Upload multiple files to a bucket and return their URLs
-  static async uploadMultipleFiles(
+  async uploadMultipleFiles(
     bucketName: string,
     files: { fileName: string; path: string }[],
   ): Promise<any> {
     try {
       const uploadResults = await Promise.all(
         files.map(async (file) => {
-          await MINIO.fPutObject(bucketName, file.fileName, file.path);
-          const fileUrl = await MINIO.presignedGetObject(
+          await this.client.fPutObject(bucketName, file.fileName, file.path);
+          const fileUrl = await this.client.presignedGetObject(
             bucketName,
             file.fileName,
             24 * 60 * 60,
@@ -154,9 +157,9 @@ export class MinioService {
   }
 
   // Get a presigned URL for a file
-  static async getFileUrl(bucketName: string, fileName: string): Promise<any> {
+  async getFileUrl(bucketName: string, fileName: string): Promise<any> {
     try {
-      const url = await MINIO.presignedGetObject(
+      const url = await this.client.presignedGetObject(
         bucketName,
         fileName,
         24 * 60 * 60,
@@ -178,12 +181,9 @@ export class MinioService {
   }
 
   // Delete a single file from a bucket
-  static async deleteSingleFile(
-    bucketName: string,
-    fileName: string,
-  ): Promise<any> {
+  async deleteSingleFile(bucketName: string, fileName: string): Promise<any> {
     try {
-      await MINIO.removeObject(bucketName, fileName);
+      await this.client.removeObject(bucketName, fileName);
       return {
         success: true,
         message: 'File deleted successfully',
@@ -200,12 +200,12 @@ export class MinioService {
   }
 
   // Delete multiple files from a bucket
-  static async deleteMultipleFiles(
+  async deleteMultipleFiles(
     bucketName: string,
     objectsList: string[],
   ): Promise<any> {
     try {
-      await MINIO.removeObjects(bucketName, objectsList);
+      await this.client.removeObjects(bucketName, objectsList);
       return {
         success: true,
         message: 'Files deleted successfully',
@@ -222,10 +222,10 @@ export class MinioService {
   }
 
   // Get a list of files in a bucket
-  static async getBucketFiles(bucketName: string): Promise<any> {
+  async getBucketFiles(bucketName: string): Promise<any> {
     try {
       const objects: BucketItem[] = [];
-      const stream = MINIO.listObjects(bucketName, '', true);
+      const stream = this.client.listObjects(bucketName, '', true);
       for await (const obj of stream) {
         objects.push(obj);
       }
@@ -246,18 +246,15 @@ export class MinioService {
   }
 
   // Delete a folder in a bucket
-  static async deleteFolder(
-    bucketName: string,
-    folderPath: string,
-  ): Promise<any> {
+  async deleteFolder(bucketName: string, folderPath: string): Promise<any> {
     try {
       const objectsList: string[] = [];
-      const stream = MINIO.listObjects(bucketName, folderPath, true);
+      const stream = this.client.listObjects(bucketName, folderPath, true);
       for await (const obj of stream) {
         objectsList.push(obj.name);
       }
       if (objectsList.length > 0) {
-        await MINIO.removeObjects(bucketName, objectsList);
+        await this.client.removeObjects(bucketName, objectsList);
       }
       return {
         success: true,
