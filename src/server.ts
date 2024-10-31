@@ -2,7 +2,7 @@
 /// <reference path="./types/global.d.ts" />
 
 // Import global variables first
-import { GlobalInitializer } from 'helpers/init-globals';
+import { GlobalInitializer } from 'helpers/config/init-globals';
 
 // Initialize global variables
 GlobalInitializer.init();

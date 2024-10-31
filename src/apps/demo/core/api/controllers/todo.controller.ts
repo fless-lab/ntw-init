@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
-import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
+import {
+  ApiResponse,
+  ErrorResponse,
+  ErrorResponseType,
+} from '@nodesandbox/response-kit';
 import { TodoService } from 'apps/demo/core/business';
+import { CreateTodoRequestSchema } from '../dtos';
+import { sanitize } from 'helpers';
 
 /**
  * Controller to handle the operations related to the Todo resource.
@@ -19,14 +25,24 @@ export class TodoController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const response = await TodoService.create(req.body);
-      if (response.success) {
-        ApiResponse.success(res, response, 201); // Send a success response with 201 Created status.
-      } else {
-        throw response;
+      const _payload = sanitize(req.body, CreateTodoRequestSchema);
+
+      if (!_payload.success) {
+        throw _payload.error;
       }
+
+      const response = await TodoService.create(_payload.data);
+
+      if (!response.success) {
+        throw response.error;
+      }
+
+      ApiResponse.success(res, response, 201);
     } catch (error) {
-      ApiResponse.error(res, error as ErrorResponseType); // Handle any errors.
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
     }
   }
 
