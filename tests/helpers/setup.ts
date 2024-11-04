@@ -1,14 +1,18 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 console.log('🟢 Setup script is running...');
 
-import { DB } from '../../src/core/framework';
-import { S3 } from '../../src/core/framework';
+import * as DB from '../../src/core/framework/database';
+import * as S3 from '../../src/core/framework/storage';
 
 async function testDatabaseConnection() {
   try {
-    const testUri = process.env.TEST_MONGO_URI || 'mongodb://localhost:27017';
-    const testDbName = process.env.TEST_MONGO_DB_NAME || 'test-db';
+    const testHost = process.env.TEST_DB_HOST || 'localhost';
+    const testPort = parseInt(process.env.TEST_DB_PORT ?? "27017", 10) || 27017;
+    const testDbName = process.env.TEST_DB_NAME || 'test-db';
 
-    await DB.mongo.init(testUri, testDbName);
+    await DB.mongo.init(testHost, testPort, testDbName);
     console.log('✅ MongoDB initialized for testing.');
   } catch (error) {
     console.error('❌ Failed to initialize MongoDB for testing:', error);
