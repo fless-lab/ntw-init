@@ -11,4 +11,4 @@ class StorageModule {
   }
 }
 
-export const Storage = new StorageModule();
+export const storage = new StorageModule();
