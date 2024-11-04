@@ -3,9 +3,12 @@ import {
   bruteForceMiddleware,
   validateRequest,
 } from './middlewares';
+import { storage } from './storage';
 
 export const SharedModule = {
-  services: {},
+  services: {
+    storage,
+  },
   middlewares: {
     bruteForce: bruteForceMiddleware,
     enableRateLimiter: apiRateLimiter,
