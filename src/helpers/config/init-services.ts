@@ -1,6 +1,6 @@
-import { testDatabaseConnection } from './db-connection-test';
-import { testRedisConnection } from './redis-test';
-import { testMinioConnection } from './minio-test';
+import { testDatabaseConnection } from '../database/db-connection-test';
+import { testRedisConnection } from '../database/redis-test';
+import { testMinioConnection } from '../storage/minio-test';
 
 async function initServices(): Promise<void> {
   const services = [

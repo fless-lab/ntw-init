@@ -1,10 +1,9 @@
-import { sanitize } from './../../../../../helpers/joi-sanitizer';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
 import { TodoService } from 'apps/demo/core/business';
 import { NextFunction, Request, Response } from 'express';
-import { TodoRequest, TodoRequestSchema } from '../dtos/request';
-import { TodoResponse, TodoResponseSchema } from '../dtos/response';
+import { sanitize } from 'helpers';
+import { CreateTodoRequestSchema } from '../dtos';
 
 /**
  * Controller to handle the operations related to the Todo resource.
@@ -22,16 +21,24 @@ export class TodoController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const payload: TodoRequest = await sanitize(req.body, TodoRequestSchema);
+      const _payload = sanitize(req.body, CreateTodoRequestSchema);
 
-      const response = await TodoService.create(payload);
+      if (!_payload.success) {
+        throw _payload.error;
+      }
+      const response = await TodoService.create(_payload.data);
       if (response.success) {
         ApiResponse.success(res, response, 201); // Send a success response with 201 Created status.
       } else {
         throw response;
       }
+
+      ApiResponse.success(res, response, 201);
     } catch (error) {
-      ApiResponse.error(res, error as ErrorResponseType); // Handle any errors.
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
     }
   }
 
@@ -47,10 +54,8 @@ export class TodoController {
     next: NextFunction,
   ): Promise<void> {
     try {
-      const filters: TodoResponse = await sanitize(
-        req.query,
-        TodoResponseSchema,
-      ); // Extract query params for filtering.
+      const filters = req.query;
+
       const response = await TodoService.getTodos(filters);
 
       if (response.success) {

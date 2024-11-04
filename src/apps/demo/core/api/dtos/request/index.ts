@@ -1,1 +1,1 @@
-export * from './todo.create.request';
+export * from './create-todo.request';
