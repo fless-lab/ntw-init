@@ -30,13 +30,9 @@ export class DiskStorageService {
       }
 
       fs.mkdirSync('/home/michee/projects/system-api/ntw-init/upload');
-      return this.handleResponse(true, '✖️✖️✖️ Dossier créer avec succès', 201);
+      return this.handleResponse(true, 'Dossier créer avec succès', 201);
     } catch (error) {
-      return this.handleResponse(
-        false,
-        '😒😒😒 Erreur lors de la création',
-        500,
-      );
+      return this.handleResponse(false, 'Erreur lors de la création', 500);
     }
   }
 
