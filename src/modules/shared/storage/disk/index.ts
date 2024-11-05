@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import crypto from 'crypto';
 import fs, { promises as fsPromise } from 'fs';
 import path from 'path';
@@ -5,7 +8,9 @@ import { detectFileType } from '../../../../helpers/utils/file';
 import { FileMetadata } from './types';
 
 export class DiskStorageService {
-  private static uploadDir: string = path.join(process.cwd(), 'upload');
+  private static uploadDir: string = path.resolve(
+    process.env.DISK_STORAGE_UPLOAD_FOLDER || 'uploadtest',
+  );
 
   private static handleResponse(
     success: boolean,
@@ -26,17 +31,13 @@ export class DiskStorageService {
   static async CreateUploadFolder() {
     try {
       if (fs.existsSync(this.uploadDir)) {
-        return this.handleResponse(false, '👌👌👌 Dossier existant', 409);
+        return this.handleResponse(false, 'Dossier existant', 409);
       }
 
-      fs.mkdirSync('/home/michee/projects/system-api/ntw-init/upload');
-      return this.handleResponse(true, '✖️✖️✖️ Dossier créer avec succès', 201);
+      fs.mkdirSync(this.uploadDir);
+      return this.handleResponse(true, 'Dossier créer avec succès', 201);
     } catch (error) {
-      return this.handleResponse(
-        false,
-        '😒😒😒 Erreur lors de la création',
-        500,
-      );
+      return this.handleResponse(false, 'Erreur lors de la création', 500);
     }
   }
 

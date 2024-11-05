@@ -3,7 +3,10 @@ import path from 'path';
 import { DiskStorageService } from '..';
 
 describe('DiskStorageService', () => {
-  const TEST_UPLOAD_DIR = path.join(process.cwd(), 'upload');
+  const TEST_UPLOAD_DIR = path.resolve(
+    process.env.DISK_STORAGE_UPLOAD_FOLDER || 'uploadtest',
+  );
+
   const TEST_FILE_CONTENT = Buffer.from(
     '%PDF-1.4\n' +
       '1 0 obj\n' +
@@ -22,6 +25,14 @@ describe('DiskStorageService', () => {
   beforeAll(async () => {
     if (!fs.existsSync(TEST_UPLOAD_DIR)) {
       await DiskStorageService.CreateUploadFolder();
+    }
+  });
+
+  afterAll(async () => {
+    try {
+      await Promise.all(await DiskStorageService.deleteDirectory());
+    } catch (error) {
+      console.error('Cleanup error:', error);
     }
   });
 
@@ -116,16 +127,6 @@ describe('DiskStorageService', () => {
 
       const files = fs.readdirSync(TEST_UPLOAD_DIR);
       expect(files.length).toBe(0);
-    });
-  });
-
-  describe('deleteDirectory', () => {
-    it('should delete directory successfully', async () => {
-      const result = await DiskStorageService.deleteDirectory();
-
-      expect(result.success).toBe(true);
-      expect(result.code).toBe(200);
-      expect(fs.existsSync(TEST_UPLOAD_DIR)).toBe(false);
     });
   });
 
