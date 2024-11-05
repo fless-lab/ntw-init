@@ -33,8 +33,8 @@ export class DiskStorageService {
       if (fs.existsSync(this.uploadDir)) {
         return this.handleResponse(false, 'Dossier existant', 409);
       }
-
       fs.mkdirSync(this.uploadDir);
+
       return this.handleResponse(true, 'Dossier créer avec succès', 201);
     } catch (error) {
       return this.handleResponse(false, 'Erreur lors de la création', 500);
