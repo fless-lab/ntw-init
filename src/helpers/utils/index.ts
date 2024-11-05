@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+export * from './file';
 export * from './generator';
-export * from './time';
 export * from './string';
+export * from './time';
