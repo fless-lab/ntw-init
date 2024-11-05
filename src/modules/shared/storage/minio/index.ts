@@ -1,6 +1,6 @@
-import { Client, BucketItem, ItemBucketMetadata, CopyConditions } from 'minio';
-import { Readable } from 'stream';
+import { BucketItem, Client, CopyConditions, ItemBucketMetadata } from 'minio';
 import * as path from 'path';
+import { Readable } from 'stream';
 import { BucketPolicy, FileStats } from './types';
 
 export class MinioStorageService {
@@ -14,7 +14,7 @@ export class MinioStorageService {
       this.minioClient = MINIO;
     } else {
       this.minioClient = new Client({
-        endPoint: process.env.MINIO_HOST || '172.17.64.1',
+        endPoint: process.env.MINIO_HOST || 'localhost',
         port: parseInt(process.env.MINIO_API_PORT || '5500', 10),
         useSSL: process.env.MINIO_USE_SSL === 'true',
         accessKey: process.env.MINIO_ACCESS_KEY || 'minio-access-key',

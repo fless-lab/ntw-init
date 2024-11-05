@@ -1,6 +1,6 @@
 import { BucketItem } from 'minio';
-import { Readable } from 'stream';
 import * as path from 'path';
+import { Readable } from 'stream';
 import { MinioStorageService } from '..';
 
 describe('MinioStorageService', () => {
@@ -13,6 +13,7 @@ describe('MinioStorageService', () => {
 
   beforeAll(() => {
     minioService = new MinioStorageService();
+    console.log('minio service : ', minioService);
   });
 
   beforeEach(async () => {
