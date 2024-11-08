@@ -1,4 +1,38 @@
 services:
+  traefik:
+    image: traefik:v3.1
+    container_name: ntw-traefik
+    restart: always
+    command:
+      - --api.insecure=true
+      - --api.dashboard=true
+      - --ping=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web-secure.address=:443
+      - --log.level=DEBUG
+      - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - "/letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - ./certs:/certs
+    healthcheck:
+      test: [ "CMD", "traefik", "healthcheck", "--ping" ]
+      interval: 30s
+      retries: 10
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.dashboard.rule=Host(`traefik.localhost`)
+      - traefik.http.routers.dashboard.service=api@internal
+      - traefik.http.routers.dashboard.entrypoints=web
+
   app:
     build: .
     container_name: ntw-app
@@ -6,6 +40,10 @@ services:
       - "${PORT}:${PORT}"
     env_file:
       - .env
+    labels:
+    - traefik.enable=true
+    - traefik.http.routers.app.rule=Host(`app.localhost`)
+    - traefik.http.services.app.loadbalancer.server.port=${PORT}
     depends_on:
       - mongo
       - redis
@@ -33,7 +71,7 @@ services:
     container_name: ntw-minio
     command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
     ports:
-      - "${MINIO_EXT_API_PORT}:${MINIO_API_PORT}" 
+      - "${MINIO_EXT_API_PORT}:${MINIO_API_PORT}"
       - "${MINIO_EXT_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
@@ -52,6 +90,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.app.rule=Host(`mail.localhost`)
+      - traefik.http.services.app.loadbalancer.server.port=${MAILDEV_WEBAPP_PORT}
 
 volumes:
   mongo-data:
