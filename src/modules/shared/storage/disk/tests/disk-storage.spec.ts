@@ -161,30 +161,26 @@ describe('DiskStorageService', () => {
     });
   });
 
-  describe('moveFile', () => {
-    let sourceId: string;
-
-    beforeEach(async () => {
+  describe('updateFile', () => {
+    it('should move file successfully', async () => {
       const uploadResult =
         await DiskStorageService.uploadFile(TEST_FILE_CONTENT);
-      sourceId = uploadResult.data;
-    });
+      const fileId = uploadResult.data;
 
-    it('should move file successfully', async () => {
-      const destinationId = 'moved-file';
-      const result = await DiskStorageService.moveFile(sourceId, destinationId);
+      const newContent = 'moved-file';
+      const result = await DiskStorageService.updateFile(fileId, newContent);
 
       expect(result.success).toBe(true);
       expect(result.code).toBe(201);
 
-      const sourcePath = path.join(TEST_UPLOAD_DIR, sourceId);
-      const destinationPath = path.join(TEST_UPLOAD_DIR, destinationId);
-      expect(fs.existsSync(sourcePath)).toBe(false);
-      expect(fs.existsSync(destinationPath)).toBe(true);
+      expect(fs.existsSync(newContent)).toBe(true);
     });
 
     it('should handle moving non-existent files', async () => {
-      const result = await DiskStorageService.moveFile('non-existent', 'dest');
+      const result = await DiskStorageService.updateFile(
+        'fileId',
+        'non-existent',
+      );
 
       expect(result.success).toBe(false);
       expect(result.code).toBe(500);

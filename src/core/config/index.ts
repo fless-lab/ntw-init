@@ -74,6 +74,10 @@ export interface Config {
       { code: string; title: string; description: string; message: string }
     >;
   };
+  fs: {
+    stores?: Array<string>;
+    defaultStore: string;
+  };
 }
 
 export class ConfigService {
@@ -224,6 +228,10 @@ export class ConfigService {
             message: 'Your OTP code for login confirmation is:',
           },
         },
+      },
+      fs: {
+        stores: process.env.FILE_STORES?.split(','),
+        defaultStore: process.env.DEFAULT_FILE_STORAGE || 'disk',
       },
     };
   }

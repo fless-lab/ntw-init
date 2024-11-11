@@ -4,7 +4,7 @@ dotenv.config();
 import crypto from 'crypto';
 import fs, { promises as fsPromise } from 'fs';
 import path from 'path';
-import { detectFileType } from '../../../../helpers/utils/file';
+import { detectFileType, encryptAES } from '../../../../helpers/utils';
 import { FileMetadata } from './types';
 
 export class DiskStorageService {
@@ -33,17 +33,26 @@ export class DiskStorageService {
       if (fs.existsSync(this.uploadDir)) {
         return this.handleResponse(false, 'Dossier existant', 409);
       }
-      fs.mkdirSync(this.uploadDir);
+      fs.mkdirSync(this.uploadDir, { recursive: true });
 
       return this.handleResponse(true, 'Dossier créer avec succès', 201);
     } catch (error) {
-      return this.handleResponse(false, 'Erreur lors de la création', 500);
+      console.error('Erreur lors de la création du dossier :', error);
+      return this.handleResponse(
+        false,
+        'Erreur lors de la création',
+        500,
+        undefined,
+        error as Error,
+      );
     }
   }
 
   static async uploadFile(contentBuffer: Buffer): Promise<any> {
     try {
       await this.CreateUploadFolder();
+
+      console.log('⚔️⚔️⚔️⚔️⚔️ contact reusi');
 
       const hash = crypto
         .createHash('sha256')
@@ -57,19 +66,24 @@ export class DiskStorageService {
 
       await fsPromise.writeFile(filePath, contentBuffer);
 
+      const hashedName = encryptAES(
+        fileId,
+        process.env.CRYPTAGE_KEY || 'secret-key',
+      );
+
       const fileData: FileMetadata = {
-        name: fileId,
+        // name: fileId,
         size: contentBuffer.length,
         type: fileType,
         extension: `.${fileType || 'bin'}`,
-        hash: hash,
+        hash: hashedName,
       };
 
       return this.handleResponse(
         true,
         'FIchier uploader avec succes',
         201,
-        fileData.name,
+        fileData,
       );
     } catch (error) {
       return this.handleResponse(
@@ -212,17 +226,20 @@ export class DiskStorageService {
     }
   }
 
-  static async moveFile(sourceId: string, destinationId: string): Promise<any> {
+  static async updateFile(fileId: any, newContent: any): Promise<any> {
     try {
-      const sourcePath = path.join(this.uploadDir, sourceId);
-      const destinationPath = path.join(this.uploadDir, destinationId);
-      const newName = await fsPromise.rename(sourcePath, destinationPath);
+      const file = await this.getFile(fileId);
+      if (!file.error) {
+        throw file.error;
+      }
+
+      const updateFile = await fsPromise.writeFile(this.uploadDir, newContent);
 
       return this.handleResponse(
         true,
         'La modification du nom du fichier a été effectuer avec succès',
         201,
-        newName,
+        updateFile,
       );
     } catch (error) {
       return this.handleResponse(
