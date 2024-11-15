@@ -12,9 +12,6 @@ export class DiskStorageService {
   private uploadDir: string = path.resolve(
     process.env.DISK_STORAGE_UPLOAD_FOLDER || './upload',
   );
-  static CreateUploadFolder: any;
-  static uploadDir: string;
-  static handleResponse: any;
 
   private handleResponse(
     success: boolean,

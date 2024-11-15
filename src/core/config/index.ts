@@ -231,7 +231,7 @@ export class ConfigService {
       },
       fs: {
         stores: process.env.FILE_STORES?.split(','),
-        defaultStore: process.env.DEFAULT_FILE_STORAGE || 'disk',
+        defaultStore: process.env.FILE_STORAGE || 'disk',
       },
     };
   }
