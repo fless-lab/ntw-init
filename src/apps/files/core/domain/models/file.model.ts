@@ -12,15 +12,15 @@ const metaDataSchema = createBaseSchema<IMetaDataModel>(
     },
     originalname: {
       type: String,
-      required: false,
+      required: true,
     },
     encoding: {
       type: String,
-      required: false,
+      required: true,
     },
     mimetype: {
       type: String,
-      required: false,
+      required: true,
     },
   },
   {

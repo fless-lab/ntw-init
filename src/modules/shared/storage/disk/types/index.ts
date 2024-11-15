@@ -4,4 +4,6 @@ export interface FileMetadata {
   type: string;
   extension: string;
   hash: string;
+  path: string;
+  mimetype?: string;
 }

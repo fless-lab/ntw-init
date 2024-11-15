@@ -6,6 +6,7 @@ export type TodoPriority = 'low' | 'medium' | 'high';
 export interface ITodo {
   title: string;
   description?: string;
+  image: string;
   completed: boolean;
   dueDate?: Date;
   priority: TodoPriority;

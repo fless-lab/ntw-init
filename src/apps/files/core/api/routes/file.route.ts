@@ -12,6 +12,8 @@ router.get('/', FileController.getFilesDB);
 
 router.get('/:fileId', FileController.getFileById);
 
+router.get('/:fileId/download', FileController.downloadFile);
+
 router.delete('/:fileId', FileController.deleteFileAll);
 
 export default router;

@@ -6,19 +6,9 @@ import {
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
 import { decryptAES, parseSortParam } from 'helpers';
-import { DiskStorageService } from 'modules/shared/storage/disk';
-import { FileModel, FileStorageType, IFileModel } from '../../domain';
+import { storage } from 'modules/shared/storage';
+import { FileModel, IFileModel } from '../../domain';
 import { FileRepository } from '../repositories';
-
-export interface FileData {
-  name: string;
-  size: number;
-  type?: string;
-  extension?: string;
-  storageType?: FileStorageType;
-  url: string;
-  fileHash?: any;
-}
 
 class FileService extends BaseService<IFileModel, FileRepository> {
   constructor() {
@@ -29,13 +19,24 @@ class FileService extends BaseService<IFileModel, FileRepository> {
     this.searchFields = ['name', 'extension', 'size', 'type'];
   }
 
-  async uploadFile(file: any) {
+  async createFile(file: any) {
     try {
+      const meta = file;
       const buffer = file.buffer;
 
-      const payload = await DiskStorageService.uploadFile(buffer);
+      const payload = await storage.disk.uploadFile(buffer);
 
-      return { success: true, arguments: payload.data };
+      const insertFile = {
+        hash: payload.data.hash,
+        size: payload.data.size,
+        type: payload.data.type,
+        extension: payload.data.extension,
+        metadata: meta,
+      };
+
+      const response = await this.repository.create(insertFile);
+
+      return { success: true, document: response };
     } catch (error) {
       return {
         success: false,
@@ -79,65 +80,93 @@ class FileService extends BaseService<IFileModel, FileRepository> {
     });
   }
 
-  async getFileDisk(
-    payload: any,
+  async getFileDIsk(
+    fileId: any,
   ): Promise<SuccessResponseType<IFileModel> | ErrorResponseType> {
+    const payload = await this.repository.findOne({ _id: fileId });
+    // TODO Gerer les erreurs liés au fichier introuvable avec (if) apres la modification du package ErrorResponseType
+
+    const hash = payload?.hash as string;
+
     const fileDiskName = decryptAES(
-      payload.document?.hash,
+      hash,
       process.env.CRYPTAGE_KEY || 'secret-key',
     );
 
-    const response = await DiskStorageService.getFile(fileDiskName);
-
-    if (!response) {
-      throw response;
-    }
-
-    console.log('⚔️⚔️⚔️⚔️⚔️ ', response);
+    const response = await storage.disk.getFile(fileDiskName);
 
     return { success: true, document: response };
   }
 
-  // async updateFileDisk(
-  //   fileId: any,
-  //   file: any,
-  // ) {
-  //   try {
-  //     const newContent = file.buffer
-
-  //     const fileDiskName = decryptAES(fileId.document?.hash, process.env.CRYPTAGE_KEY || 'secret-key')
-
-  //     await DiskStorageService.deleteFile(fileDiskName)
-
-  //     const fileUpdate = (await DiskStorageService.uploadFile(newContent))
-
-  //     return { success: true, arguments: fileUpdate.data };
-  //   } catch (error) {
-  //     return {
-  //       success: false,
-  //       error:
-  //         error instanceof ErrorResponse
-  //           ? error
-  //           : new ErrorResponse(
-  //               'INTERNAL_SERVER_ERROR',
-  //               (error as Error).message,
-  //             ),
-  //     };
-  //   }
-  // }
-
-  async deleteFIleDIsk(
+  async sendFile(
     fileId: any,
   ): Promise<SuccessResponseType<IFileModel> | ErrorResponseType> {
-    const fileDiskName = decryptAES(
-      fileId.document?.hash,
-      process.env.CRYPTAGE_KEY || 'secret-key',
-    );
+    try {
+      const file = await this.repository.findOne({ _id: fileId });
 
-    await DiskStorageService.deleteFile(fileDiskName),
-      console.log('☂️☂️☂️☂️❌❌❌❌❌ file delete ', fileDiskName);
+      // TODO Gerer les erreurs liés au fichier introuvable avec (if) apres la modification du package ErrorResponseType
+      if (!file) {
+        throw file;
+      }
+      const fileDiskName = decryptAES(
+        file.hash,
+        process.env.CRYPTAGE_KEY || 'secret-key',
+      );
 
-    return { success: true };
+      const response = await storage.disk.getFile(fileDiskName);
+
+      if (!response.success) {
+        throw response.error;
+      }
+
+      response.data.mimetype = (file.metadata as { mimetype: string }).mimetype;
+
+      return { success: true, document: response.data };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof ErrorResponse
+            ? error
+            : new ErrorResponse(
+                'INTERNAL_SERVER_ERROR',
+                (error as Error).message,
+              ),
+      };
+    }
+  }
+
+  async deleteFIle(
+    fileId: any,
+  ): Promise<SuccessResponseType<IFileModel> | ErrorResponseType> {
+    try {
+      const payload = await this.repository.findOne({ _id: fileId });
+      // TODO Gerer les erreurs liés au fichier introuvable avec (if) apres la modification du package ErrorResponseType
+
+      const hash = payload?.hash as string;
+
+      const fileDiskName = decryptAES(
+        hash,
+        process.env.CRYPTAGE_KEY || 'secret-key',
+      );
+
+      await storage.disk.deleteFile(fileDiskName);
+
+      await this.repository.delete({ _id: fileId });
+
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error instanceof ErrorResponse
+            ? error
+            : new ErrorResponse(
+                'INTERNAL_SERVER_ERROR',
+                (error as Error).message,
+              ),
+      };
+    }
   }
 }
 

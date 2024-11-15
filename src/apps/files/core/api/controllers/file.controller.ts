@@ -1,3 +1,4 @@
+import fs from 'fs';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   ApiResponse,
@@ -22,22 +23,8 @@ export class FileController {
   ): Promise<void> {
     try {
       const payload = req.file;
-
-      const diskUpload = await fileService.uploadFile(payload);
-      if (!diskUpload.success) {
-        throw diskUpload.error;
-      }
-
-      const insertFile = {
-        hash: diskUpload.arguments.hash,
-        size: diskUpload.arguments.size,
-        type: diskUpload.arguments.type,
-        extension: diskUpload.arguments.extension,
-        metadata: payload,
-      };
-
-      const response = await fileService.create(insertFile);
-
+      // const fileService  = new FileService(source:CONFIG.file)
+      const response = await fileService.createFile(payload);
       if (!response.success) {
         throw response.error;
       }
@@ -87,16 +74,7 @@ export class FileController {
   ): Promise<void> {
     try {
       const fileId = req.params.fileId;
-      const _payload = (await fileService.findOne({
-        _id: fileId,
-      })) as SuccessResponseType<IFileModel>;
-
-      if (!_payload.success) {
-        throw _payload.error;
-      }
-
-      const response = await fileService.getFileDisk(_payload);
-
+      const response = await fileService.getFileDIsk(fileId);
       if (!response.success) {
         throw response.error;
       }
@@ -107,41 +85,34 @@ export class FileController {
     }
   }
 
-  // static async updateFile(
-  //   req: Request,
-  //   res: Response,
-  //   next: NextFunction,
-  // ): Promise<void> {
-  //   try {
-  //     const fileId = req.params.fileId;
-  //     const newFile = req.file;
+  static async downloadFile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const fileId = req.params.fileId;
 
-  //     const checkFIle = (await fileService.findOne({
-  //       _id: fileId,
-  //     })) as SuccessResponseType<IFileModel>;
+      const response = (await fileService.sendFile(
+        fileId,
+      )) as SuccessResponseType<IFileModel>;
 
-  //     if (!checkFIle.success) {
-  //       throw checkFIle.error;
-  //     }
+      if (!response.success) {
+        throw response.error;
+      }
 
-  //     const payload = await fileService.updateFileDisk(checkFIle, newFile);
-  //     if (!payload.success) {
-  //       throw payload.error;
-  //     }
+      res.writeHead(200, {
+        'content-type': response.document?.mimetype,
+        'content-length': response.document?.size,
+      });
 
-  //     const insertFile = {
-  //       hash: payload.arguments.hash,
-  //       size: payload.arguments.size,
-  //       type: payload.arguments.type,
-  //       extension: payload.arguments.extension,
-  //       metadata: newFile,
-  //     };
-
-  //     const fileUpdated = await fileService.update({_id})
-  //   } catch (error) {
-  //     ApiResponse.error(res, error as ErrorResponseType);
-  //   }
-  // }
+      const filepath = response.document?.path as string;
+      const file = fs.readFileSync(filepath);
+      res.end(file);
+    } catch (error) {
+      ApiResponse.error(res, error as ErrorResponseType);
+    }
+  }
 
   /**
    * @param req
@@ -155,18 +126,8 @@ export class FileController {
   ): Promise<void> {
     try {
       const fileId = req.params.fileId;
-      const file = req.file;
 
-      const _payload = (await fileService.findOne({
-        _id: fileId,
-      })) as SuccessResponseType<IFileModel>;
-
-      if (!_payload.success) {
-        throw _payload.error;
-      }
-      await fileService.deleteFIleDIsk(_payload);
-
-      const response = await fileService.delete({ _id: fileId });
+      const response = await fileService.deleteFIle(fileId);
 
       if (response.success) {
         ApiResponse.success(res, response);
