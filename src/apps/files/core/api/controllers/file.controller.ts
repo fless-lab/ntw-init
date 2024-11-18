@@ -1,3 +1,4 @@
+import FileService from 'apps/files/core/business/services/file.service';
 import fs from 'fs';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
@@ -5,10 +6,8 @@ import {
   ErrorResponseType,
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
+import { IFileModel } from 'apps/files';
 import { NextFunction, Request, Response } from 'express';
-import { decryptAES } from 'helpers';
-import fileService from '../../business/services/file.service';
-import { IFileModel } from '../../domain';
 
 export class FileController {
   /**
@@ -23,8 +22,10 @@ export class FileController {
   ): Promise<void> {
     try {
       const payload = req.file;
-      // const fileService  = new FileService(source:CONFIG.file)
-      const response = await fileService.createFile(payload);
+      const service = CONFIG.fs.defaultStore;
+
+      const fileService = new FileService();
+      const response = await fileService.createFIle(service, payload);
       if (!response.success) {
         throw response.error;
       }
@@ -43,30 +44,6 @@ export class FileController {
    * @param res
    * @param next
    */
-  static async getFilesDB(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    try {
-      const filters = req.query;
-      const response = await fileService.getFilesDB(filters);
-
-      if (response.success) {
-        ApiResponse.success(res, response);
-      } else {
-        throw response.error;
-      }
-    } catch (error) {
-      ApiResponse.error(res, error as ErrorResponseType);
-    }
-  }
-
-  /**
-   * @param req
-   * @param res
-   * @param next
-   */
   static async getFileById(
     req: Request,
     res: Response,
@@ -74,14 +51,24 @@ export class FileController {
   ): Promise<void> {
     try {
       const fileId = req.params.fileId;
-      const response = await fileService.getFileDIsk(fileId);
-      if (!response.success) {
+      const service = CONFIG.fs.defaultStore;
+
+      const fileService = new FileService();
+      const response = (await fileService.getFile(
+        service,
+        fileId,
+      )) as SuccessResponseType<IFileModel>;
+
+      if (response.success) {
+        ApiResponse.success(res, response);
+      } else {
         throw response.error;
       }
-
-      ApiResponse.success(res, response, 200);
     } catch (error) {
-      ApiResponse.error(res, error as ErrorResponseType);
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
     }
   }
 
@@ -92,8 +79,11 @@ export class FileController {
   ): Promise<void> {
     try {
       const fileId = req.params.fileId;
+      const service = CONFIG.fs.defaultStore;
 
+      const fileService = new FileService();
       const response = (await fileService.sendFile(
+        service,
         fileId,
       )) as SuccessResponseType<IFileModel>;
 
@@ -101,6 +91,7 @@ export class FileController {
         throw response.error;
       }
 
+      // TODO Corriger le telechargement des vidéos
       res.writeHead(200, {
         'content-type': response.document?.mimetype,
         'content-length': response.document?.size,
@@ -110,7 +101,10 @@ export class FileController {
       const file = fs.readFileSync(filepath);
       res.end(file);
     } catch (error) {
-      ApiResponse.error(res, error as ErrorResponseType);
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
     }
   }
 
@@ -119,23 +113,28 @@ export class FileController {
    * @param res
    * @param next
    */
-  static async deleteFileAll(
+  static async deleteFile(
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<void> {
     try {
       const fileId = req.params.fileId;
+      const service = CONFIG.fs.defaultStore;
 
-      const response = await fileService.deleteFIle(fileId);
+      const fileService = new FileService();
+      const response = await fileService.deleteFile(service, fileId);
 
-      if (response.success) {
-        ApiResponse.success(res, response);
-      } else {
+      if (!response.success) {
         throw response.error;
       }
+
+      ApiResponse.success(res, response, 201);
     } catch (error) {
-      ApiResponse.error(res, error as ErrorResponseType);
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
     }
   }
 }

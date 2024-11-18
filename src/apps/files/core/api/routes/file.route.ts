@@ -8,12 +8,10 @@ const upload = multer();
 
 router.post('/', upload.single('file'), FileController.createFile);
 
-router.get('/', FileController.getFilesDB);
-
 router.get('/:fileId', FileController.getFileById);
 
 router.get('/:fileId/download', FileController.downloadFile);
 
-router.delete('/:fileId', FileController.deleteFileAll);
+router.delete('/:fileId', FileController.deleteFile);
 
 export default router;

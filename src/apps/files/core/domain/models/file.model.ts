@@ -40,7 +40,7 @@ const fileSchema = createBaseSchema<IFileModel>(
     },
     extension: {
       type: String,
-      required: true,
+      required: false,
     },
     size: {
       type: Number,
