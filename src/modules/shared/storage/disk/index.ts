@@ -4,15 +4,16 @@ dotenv.config();
 import crypto from 'crypto';
 import fs, { promises as fsPromise } from 'fs';
 import path from 'path';
-import { detectFileType } from '../../../../helpers/utils/file';
+import { detectFileType, encryptAES } from '../../../../helpers/utils';
 import { FileMetadata } from './types';
 
 export class DiskStorageService {
-  private static uploadDir: string = path.resolve(
-    process.env.DISK_STORAGE_UPLOAD_FOLDER || 'uploadtest',
+  // private static uploadDir: string = path.resolve('./upload');
+  private uploadDir: string = path.resolve(
+    process.env.DISK_STORAGE_UPLOAD_FOLDER || './upload',
   );
 
-  private static handleResponse(
+  private handleResponse(
     success: boolean,
     message: string,
     code: number,
@@ -28,20 +29,27 @@ export class DiskStorageService {
     };
   }
 
-  static async CreateUploadFolder() {
+  async CreateUploadFolder() {
     try {
       if (fs.existsSync(this.uploadDir)) {
         return this.handleResponse(false, 'Dossier existant', 409);
       }
-      fs.mkdirSync(this.uploadDir);
+      fs.mkdirSync(this.uploadDir, { recursive: true });
 
       return this.handleResponse(true, 'Dossier créer avec succès', 201);
     } catch (error) {
-      return this.handleResponse(false, 'Erreur lors de la création', 500);
+      console.error('Erreur lors de la création du dossier :', error);
+      return this.handleResponse(
+        false,
+        'Erreur lors de la création',
+        500,
+        undefined,
+        error as Error,
+      );
     }
   }
 
-  static async uploadFile(contentBuffer: Buffer): Promise<any> {
+  async uploadFile(contentBuffer: Buffer): Promise<any> {
     try {
       await this.CreateUploadFolder();
 
@@ -57,19 +65,25 @@ export class DiskStorageService {
 
       await fsPromise.writeFile(filePath, contentBuffer);
 
+      const hashedName = encryptAES(
+        fileId,
+        process.env.CRYPTAGE_KEY || 'secret-key',
+      );
+
       const fileData: FileMetadata = {
-        name: fileId,
+        // name: fileId,
         size: contentBuffer.length,
         type: fileType,
         extension: `.${fileType || 'bin'}`,
-        hash: hash,
+        hash: hashedName,
+        path: filePath,
       };
 
       return this.handleResponse(
         true,
         'FIchier uploader avec succes',
         201,
-        fileData.name,
+        fileData,
       );
     } catch (error) {
       return this.handleResponse(
@@ -82,7 +96,7 @@ export class DiskStorageService {
     }
   }
 
-  static async getFile(fileId: string): Promise<any> {
+  async getFile(fileId: string): Promise<any> {
     try {
       const filePath = path.join(this.uploadDir, fileId);
       const contentBuffer = await fsPromise.readFile(filePath);
@@ -94,6 +108,7 @@ export class DiskStorageService {
         size: contentBuffer.length,
         type: fileType,
         extension: fileType,
+        path: filePath,
         hash: crypto.createHash('sha256').update(contentBuffer).digest('hex'),
       };
 
@@ -114,7 +129,7 @@ export class DiskStorageService {
     }
   }
 
-  static async listFiles(): Promise<any> {
+  async listFiles(): Promise<any> {
     try {
       const files = await fsPromise.readdir(this.uploadDir);
 
@@ -130,7 +145,33 @@ export class DiskStorageService {
     }
   }
 
-  static async deleteFile(fileId: string): Promise<any> {
+  async updateFile(fileId: any, newContent: any): Promise<any> {
+    try {
+      const file = await this.getFile(fileId);
+      if (!file.error) {
+        throw file.error;
+      }
+
+      const updateFile = await fsPromise.writeFile(this.uploadDir, newContent);
+
+      return this.handleResponse(
+        true,
+        'La modification du nom du fichier a été effectuer avec succès',
+        201,
+        updateFile,
+      );
+    } catch (error) {
+      return this.handleResponse(
+        false,
+        'Erreur lors de la modification du nom',
+        500,
+        undefined,
+        error as Error,
+      );
+    }
+  }
+
+  async deleteFile(fileId: string): Promise<any> {
     try {
       const filePath = path.join(this.uploadDir, fileId);
       await fsPromise.unlink(filePath);
@@ -146,7 +187,7 @@ export class DiskStorageService {
     }
   }
 
-  static async emptyDirectory(): Promise<any> {
+  async emptyDirectory(): Promise<any> {
     try {
       const files = await fsPromise.readdir(this.uploadDir);
       const deleteFile = files.map((files) =>
@@ -170,7 +211,7 @@ export class DiskStorageService {
     }
   }
 
-  static async deleteDirectory(): Promise<any> {
+  async deleteDirectory(): Promise<any> {
     try {
       await fsPromise.rmdir(this.uploadDir);
 
@@ -190,7 +231,7 @@ export class DiskStorageService {
     }
   }
 
-  static async copyFile(sourceId: string, destinationId: string): Promise<any> {
+  async copyFile(sourceId: string, destinationId: string): Promise<any> {
     try {
       const sourcePath = path.join(this.uploadDir, sourceId);
       const destinationPath = path.join(this.uploadDir, destinationId);
@@ -205,29 +246,6 @@ export class DiskStorageService {
       return this.handleResponse(
         false,
         'Erreur lors de la copie du fichier',
-        500,
-        undefined,
-        error as Error,
-      );
-    }
-  }
-
-  static async moveFile(sourceId: string, destinationId: string): Promise<any> {
-    try {
-      const sourcePath = path.join(this.uploadDir, sourceId);
-      const destinationPath = path.join(this.uploadDir, destinationId);
-      const newName = await fsPromise.rename(sourcePath, destinationPath);
-
-      return this.handleResponse(
-        true,
-        'La modification du nom du fichier a été effectuer avec succès',
-        201,
-        newName,
-      );
-    } catch (error) {
-      return this.handleResponse(
-        false,
-        'Erreur lors de la modification du nom',
         500,
         undefined,
         error as Error,

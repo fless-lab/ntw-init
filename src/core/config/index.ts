@@ -49,6 +49,7 @@ export interface Config {
     apiPort: number;
     consolePort: number;
     useSSL: boolean;
+    bucketName: string;
   };
   mail: {
     host: string;
@@ -73,6 +74,10 @@ export interface Config {
       string,
       { code: string; title: string; description: string; message: string }
     >;
+  };
+  fs: {
+    stores?: Array<string>;
+    defaultStore: string;
   };
 }
 
@@ -134,6 +139,7 @@ export class ConfigService {
         apiPort: parseInt(process.env.MINIO_API_PORT || '9000', 10),
         consolePort: parseInt(process.env.MINIO_EXT_CONSOLE_PORT || '5050', 10),
         useSSL: process.env.MINIO_USE_SSL === 'true',
+        bucketName: process.env.MINIO_BUCKET || 'my-new-bucket',
       },
       mail: {
         host:
@@ -224,6 +230,10 @@ export class ConfigService {
             message: 'Your OTP code for login confirmation is:',
           },
         },
+      },
+      fs: {
+        stores: process.env.FILE_STORES?.split(','),
+        defaultStore: process.env.FILE_STORAGE || 'disk',
       },
     };
   }

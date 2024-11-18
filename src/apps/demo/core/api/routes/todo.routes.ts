@@ -1,13 +1,15 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { TodoController } from '../controllers';
 
 const router = Router();
+const upload = multer();
 
 /**
  * Route for creating a new Todo
  * POST /todos
  */
-router.post('/', TodoController.createTodo);
+router.post('/', upload.single('file'), TodoController.createTodo);
 
 /**
  * Route for retrieving all Todos, filtered by query parameters

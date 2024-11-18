@@ -18,6 +18,9 @@ const todoSchema = createBaseSchema<ITodoModel>(
     description: {
       type: String,
     },
+    image: {
+      type: String,
+    },
     completed: {
       type: Boolean,
       default: false,

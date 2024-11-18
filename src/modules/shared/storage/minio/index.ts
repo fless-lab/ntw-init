@@ -1,6 +1,6 @@
-import { Client, BucketItem, ItemBucketMetadata, CopyConditions } from 'minio';
-import { Readable } from 'stream';
+import { BucketItem, Client, CopyConditions, ItemBucketMetadata } from 'minio';
 import * as path from 'path';
+import { Readable } from 'stream';
 import { BucketPolicy, FileStats } from './types';
 
 export class MinioStorageService {
