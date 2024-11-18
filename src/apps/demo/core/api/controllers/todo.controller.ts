@@ -3,9 +3,11 @@ import {
   ApiResponse,
   ErrorResponse,
   ErrorResponseType,
+  SuccessResponseType,
 } from '@nodesandbox/response-kit';
 import { TodoService } from 'apps/demo/core/business';
-import fileService from 'apps/files/core/business/services/file.service';
+import { IFileModel } from 'apps/files';
+import FileService from 'apps/files/core/business/services/file.service';
 import { NextFunction, Request, Response } from 'express';
 import { sanitize } from 'helpers';
 import { CreateTodoRequestSchema } from '../dtos';
@@ -28,12 +30,17 @@ export class TodoController {
     try {
       const _payload = sanitize(req.body, CreateTodoRequestSchema);
       const image = req.file;
+      const service = CONFIG.fs.defaultStore;
 
       if (!_payload.success) {
         throw _payload.error;
       }
 
-      const todoImage = await fileService.createFile(image);
+      const fileService = new FileService();
+      const todoImage = (await fileService.createFIle(
+        service,
+        image,
+      )) as SuccessResponseType<IFileModel>;
 
       _payload.data.image = todoImage.document?._id;
 
