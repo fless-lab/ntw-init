@@ -1,32 +1,44 @@
 import { TodoRepository } from '../repositories';
 import { ITodoModel, TodoModel } from 'apps/demo/core/domain';
 import { parseSortParam } from 'helpers';
+import { BaseService } from '@nodesandbox/repo-framework';
 import {
   ErrorResponseType,
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
-import { BaseService } from '@nodesandbox/repo-framework';
 
 class TodoService extends BaseService<ITodoModel, TodoRepository> {
   constructor() {
     const todoRepo = new TodoRepository(TodoModel);
-    super(todoRepo, true, [
-      /*'attribute_to_populate'*/
-    ]); // This will populate the entity field
-    this.allowedFilterFields = ['dueDate', 'completed', 'priority']; // To filter on these fields, we need to set this
-    this.searchFields = ['title', 'description']; // This will use the search keyword
 
-    /**
-     * The allowedFilterFields and searchFields are used to filter and search on the entity fields.
-     * These declarations are there to ensure what fields are allowed to be used for filtering and searching.
-     * If you want to filter on a field that is not declared here, you can add it to the allowedFilterFields array.
-     * If you want to search on a field that is not declared here, you can add it to the searchFields array.
-     */
+    // Configuration du service avec le nouveau constructeur
+    super(todoRepo, {
+      // Configuration des options
+      slug: {
+        enabled: true,
+        sourceField: 'name',
+        targetField: 'slug',
+      },
+      filter: {
+        allowedFields: ['dueDate', 'completed', 'priority'],
+        defaultSort: { createdAt: -1 }, // Exemple de tri par défaut
+      },
+      search: {
+        enabled: true,
+        fields: ['title', 'description'],
+        caseSensitive: false,
+        fuzzySearch: false,
+      },
+      populate: {
+        fields: [],
+        defaultPopulate: false,
+      },
+    });
   }
 
   async getTodos(
     filters: Record<string, any>,
-  ): Promise<SuccessResponseType<ITodoModel> | ErrorResponseType> {
+  ): Promise<ErrorResponseType | SuccessResponseType<ITodoModel>> {
     const {
       page = 1,
       limit = 10,
@@ -36,7 +48,6 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
       completed,
       upcoming,
     } = filters;
-
     // Build query object
     const query: any = {};
     if (priority) query.priority = priority;
@@ -57,8 +68,8 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
     return this.findAll({
       query,
       sort: sortObject,
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page: parseInt(page as string),
+      limit: parseInt(limit as string),
       searchTerm: search as string,
     });
   }
@@ -66,7 +77,7 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
   async markAsComplete(
     todoId: string,
   ): Promise<SuccessResponseType<ITodoModel> | ErrorResponseType> {
-    return this.update({ _id: todoId }, { completed: true });
+    return this.updateById(todoId, { completed: true });
   }
 }
 

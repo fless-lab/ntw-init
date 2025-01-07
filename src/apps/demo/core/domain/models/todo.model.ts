@@ -12,8 +12,6 @@ const todoSchema = createBaseSchema<ITodoModel>(
     },
     slug: {
       type: String,
-      unique: true,
-      required: true,
     },
     description: {
       type: String,

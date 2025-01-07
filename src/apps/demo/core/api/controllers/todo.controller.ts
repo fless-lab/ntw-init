@@ -1,14 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from 'express';
-import {
-  ApiResponse,
-  ErrorResponse,
-  ErrorResponseType,
-} from '@nodesandbox/response-kit';
 import { TodoService } from 'apps/demo/core/business';
 import { CreateTodoRequestSchema } from '../dtos';
 import { sanitize } from 'helpers';
-
+import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
 /**
  * Controller to handle the operations related to the Todo resource.
  */
@@ -17,12 +11,12 @@ export class TodoController {
    * Create a new Todo item.
    * @param req - Express Request object containing the todo data in the request body.
    * @param res - Express Response object for sending the API response.
-   * @param next - Next middleware function in the Express stack.
+   * @param _next - Next middleware function in the Express stack.
    */
   static async createTodo(
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
   ): Promise<void> {
     try {
       const _payload = sanitize(req.body, CreateTodoRequestSchema);
@@ -50,12 +44,12 @@ export class TodoController {
    * Retrieve a list of Todos based on filters (priority, completion, etc.).
    * @param req - Express Request object, with filters in the query params.
    * @param res - Express Response object for sending the API response.
-   * @param next - Next middleware function in the Express stack.
+   * @param _next - Next middleware function in the Express stack.
    */
   static async getTodos(
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
   ): Promise<void> {
     try {
       const filters = req.query; // Extract query params for filtering.
@@ -75,12 +69,12 @@ export class TodoController {
    * Retrieve a single Todo item by its ID.
    * @param req - Express Request object, with the Todo ID in the URL params.
    * @param res - Express Response object for sending the API response.
-   * @param next - Next middleware function in the Express stack.
+   * @param _next - Next middleware function in the Express stack.
    */
   static async getTodoById(
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
   ): Promise<void> {
     try {
       const todoId = req.params.todoId; // Extract the Todo ID from the request params.
@@ -99,12 +93,12 @@ export class TodoController {
    * Update an existing Todo item by its ID.
    * @param req - Express Request object, with the Todo ID in the URL params and updated data in the request body.
    * @param res - Express Response object for sending the API response.
-   * @param next - Next middleware function in the Express stack.
+   * @param _next - Next middleware function in the Express stack.
    */
   static async updateTodo(
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
   ): Promise<void> {
     try {
       const todoId = req.params.todoId; // Extract the Todo ID from the request params.
@@ -124,12 +118,12 @@ export class TodoController {
    * Delete a Todo item by its ID.
    * @param req - Express Request object, with the Todo ID in the URL params.
    * @param res - Express Response object for sending the API response.
-   * @param next - Next middleware function in the Express stack.
+   * @param _next - Next middleware function in the Express stack.
    */
   static async deleteTodo(
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
   ): Promise<void> {
     try {
       const todoId = req.params.todoId; // Extract the Todo ID from the request params.
@@ -149,12 +143,12 @@ export class TodoController {
    * Mark a Todo item as complete by its ID.
    * @param req - Express Request object, with the Todo ID in the URL params.
    * @param res - Express Response object for sending the API response.
-   * @param next - Next middleware function in the Express stack.
+   * @param _next - Next middleware function in the Express stack.
    */
   static async markTodoAsComplete(
     req: Request,
     res: Response,
-    next: NextFunction,
+    _next: NextFunction,
   ): Promise<void> {
     try {
       const todoId = req.params.todoId; // Extract the Todo ID from the request params.
