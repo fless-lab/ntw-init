@@ -27,7 +27,12 @@ export const sanitize = <T>(
 
     return {
       success: false,
-      error: new ErrorResponse('VALIDATION_ERROR', message, suggestions, error),
+      error: new ErrorResponse({
+        code: 'VALIDATION_ERROR',
+        message,
+        suggestions,
+        originalError: error,
+      }),
     };
   }
 
