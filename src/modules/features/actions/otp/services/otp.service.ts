@@ -14,7 +14,7 @@ import {
 class OTPService extends BaseService<IOTPModel, OTPRepository> {
   constructor() {
     const otpRepo = new OTPRepository(OTPModel);
-    super(otpRepo, false);
+    super(otpRepo);
   }
 
   async generate(
@@ -22,15 +22,13 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
     purpose: TOTPPurpose,
   ): Promise<SuccessResponseType<IOTPModel> | ErrorResponseType> {
     try {
-      const userResponse = (await UserService.findOne({
-        email,
-      })) as SuccessResponseType<IUserModel>;
-      if (!userResponse.success || !userResponse.document) {
+      const userResponse = await UserService.findOne({ email });
+      if (!userResponse.success || !userResponse.data) {
         // TODO: Customize this kind of error to override BaseService generic not found
         throw userResponse.error;
       }
 
-      const user = userResponse.document;
+      const user = userResponse.data.docs as unknown as IUserModel;
       await this.repository.invalidateOldCodes(user.id, purpose);
 
       const otp = await this.repository.create({
@@ -50,17 +48,17 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
       //   throw mailResponse.error;
       // }
 
-      return { success: true, document: otp };
+      return { success: true, data: otp };
     } catch (error) {
       return {
         success: false,
         error:
           error instanceof ErrorResponse
             ? error
-            : new ErrorResponse(
-                'INTERNAL_SERVER_ERROR',
-                (error as Error).message,
-              ),
+            : new ErrorResponse({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: (error as Error).message,
+              }),
       };
     }
   }
@@ -71,24 +69,25 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
     purpose: TOTPPurpose,
   ): Promise<SuccessResponseType<null> | ErrorResponseType> {
     try {
-      const userResponse = (await UserService.findOne({
-        email,
-      })) as SuccessResponseType<IUserModel>;
-      if (!userResponse.success || !userResponse.document) {
-        throw new ErrorResponse('NOT_FOUND_ERROR', 'User not found.');
+      const userResponse = await UserService.findOne({ email });
+      if (!userResponse.success || !userResponse.data) {
+        throw new ErrorResponse({
+          code: 'NOT_FOUND_ERROR',
+          message: 'User not found.',
+        });
       }
 
-      const user = userResponse.document;
+      const user = userResponse.data.docs as unknown as IUserModel;
       const otpResponse = await this.repository.findValidCodeByUser(
         code,
         user.id,
         purpose,
       );
 
-      const invalidOtpError = new ErrorResponse(
-        'UNAUTHORIZED',
-        'This OTP code is invalid or has expired.',
-      );
+      const invalidOtpError = new ErrorResponse({
+        code: 'UNAUTHORIZED',
+        message: 'This OTP code is invalid or has expired.',
+      });
 
       if (!otpResponse) {
         throw invalidOtpError;
@@ -108,10 +107,10 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
         error:
           error instanceof ErrorResponse
             ? error
-            : new ErrorResponse(
-                'INTERNAL_SERVER_ERROR',
-                (error as Error).message,
-              ),
+            : new ErrorResponse({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: (error as Error).message,
+              }),
       };
     }
   }
