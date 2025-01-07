@@ -1,3 +1,5 @@
+// TODO - Format error responses
+
 import JWT, { SignOptions } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse, ErrorResponse } from '@nodesandbox/response-kit';
@@ -46,10 +48,10 @@ class JwtStrategy {
           if (err || !token) {
             LOGGER.error(err?.message, err);
             return reject(
-              new ErrorResponse(
-                'INTERNAL_SERVER_ERROR',
-                'Internal Server Error',
-              ),
+              new ErrorResponse({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'Internal Server Error',
+              }),
             );
           }
           resolve(token);
@@ -64,7 +66,10 @@ class JwtStrategy {
         if (err) {
           LOGGER.error(err.message, err);
           return reject(
-            new ErrorResponse('INTERNAL_SERVER_ERROR', 'Internal Server Error'),
+            new ErrorResponse({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'Internal Server Error',
+            }),
           );
         }
         resolve(result === 'blacklisted');
@@ -80,9 +85,11 @@ class JwtStrategy {
     if (!req.headers['authorization']) {
       return ApiResponse.error(res, {
         success: false,
-        error: new ErrorResponse('UNAUTHORIZED', 'Unauthorized', [
-          'No authorization header provided',
-        ]),
+        error: new ErrorResponse({
+          code: 'UNAUTHORIZED',
+          message: 'Unauthorized',
+          suggestions: ['No authorization header provided'],
+        }),
       }) as any;
     }
 
@@ -98,7 +105,7 @@ class JwtStrategy {
             err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
           return ApiResponse.error(res, {
             success: false,
-            error: new ErrorResponse('UNAUTHORIZED', message),
+            error: new ErrorResponse({ code: 'UNAUTHORIZED', message }),
           });
         }
 
@@ -107,9 +114,11 @@ class JwtStrategy {
           if (blacklisted) {
             return ApiResponse.error(res, {
               success: false,
-              error: new ErrorResponse('FORBIDDEN', 'Forbidden', [
-                'Token is blacklisted',
-              ]),
+              error: new ErrorResponse({
+                code: 'FORBIDDEN',
+                message: 'Forbidden',
+                suggestions: ['Token is blacklisted'],
+              }),
             });
           }
         } catch (error) {
@@ -142,10 +151,10 @@ class JwtStrategy {
           if (err || !token) {
             LOGGER.error(err?.message, err);
             return reject(
-              new ErrorResponse(
-                'INTERNAL_SERVER_ERROR',
-                'Internal Server Error',
-              ),
+              new ErrorResponse({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'Internal Server Error',
+              }),
             );
           }
 
@@ -158,10 +167,10 @@ class JwtStrategy {
               if (redisErr) {
                 LOGGER.error(redisErr.message, redisErr);
                 return reject(
-                  new ErrorResponse(
-                    'INTERNAL_SERVER_ERROR',
-                    'Internal Server Error',
-                  ),
+                  new ErrorResponse({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'Internal Server Error',
+                  }),
                 );
               }
               resolve(token);
@@ -179,7 +188,12 @@ class JwtStrategy {
         this.refreshTokenSecret,
         (err: any, payload: any) => {
           if (err) {
-            return reject(new ErrorResponse('UNAUTHORIZED', 'Unauthorized'));
+            return reject(
+              new ErrorResponse({
+                code: 'UNAUTHORIZED',
+                message: 'Unauthorized',
+              }),
+            );
           }
 
           const userId = payload?.aud as string;
@@ -188,10 +202,10 @@ class JwtStrategy {
             if (redisErr) {
               LOGGER.error(redisErr.message, redisErr);
               return reject(
-                new ErrorResponse(
-                  'INTERNAL_SERVER_ERROR',
-                  'Internal Server Error',
-                ),
+                new ErrorResponse({
+                  code: 'INTERNAL_SERVER_ERROR',
+                  message: 'Internal Server Error',
+                }),
               );
             }
 
@@ -199,7 +213,12 @@ class JwtStrategy {
               return resolve(userId);
             }
 
-            return reject(new ErrorResponse('UNAUTHORIZED', 'Unauthorized'));
+            return reject(
+              new ErrorResponse({
+                code: 'UNAUTHORIZED',
+                message: 'Unauthorized',
+              }),
+            );
           });
         },
       );
@@ -217,10 +236,10 @@ class JwtStrategy {
           if (redisErr) {
             LOGGER.error(redisErr.message, redisErr);
             return reject(
-              new ErrorResponse(
-                'INTERNAL_SERVER_ERROR',
-                'Internal Server Error',
-              ),
+              new ErrorResponse({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'Internal Server Error',
+              }),
             );
           }
           resolve();
@@ -235,7 +254,10 @@ class JwtStrategy {
         if (redisErr) {
           LOGGER.error(redisErr.message, redisErr);
           return reject(
-            new ErrorResponse('INTERNAL_SERVER_ERROR', 'Internal Server Error'),
+            new ErrorResponse({
+              code: 'INTERNAL_SERVER_ERROR',
+              message: 'Internal Server Error',
+            }),
           );
         }
         resolve();
@@ -254,7 +276,7 @@ class JwtStrategy {
           if (err) {
             const message =
               err.name === 'JsonWebTokenError' ? 'Unauthorized' : err.message;
-            return reject(new ErrorResponse('UNAUTHORIZED', message));
+            return reject(new ErrorResponse({ code: 'UNAUTHORIZED', message }));
           }
 
           const userId = payload?.aud as string;
@@ -274,7 +296,12 @@ class JwtStrategy {
         this.refreshTokenSecret,
         (err: any, payload: any) => {
           if (err) {
-            return reject(new ErrorResponse('UNAUTHORIZED', 'Unauthorized'));
+            return reject(
+              new ErrorResponse({
+                code: 'UNAUTHORIZED',
+                message: 'Unauthorized',
+              }),
+            );
           }
 
           const userId = payload?.aud as string;
@@ -283,10 +310,10 @@ class JwtStrategy {
             if (redisErr) {
               LOGGER.error(redisErr.message, redisErr);
               return reject(
-                new ErrorResponse(
-                  'INTERNAL_SERVER_ERROR',
-                  'Internal Server Error',
-                ),
+                new ErrorResponse({
+                  code: 'INTERNAL_SERVER_ERROR',
+                  message: 'Internal Server Error',
+                }),
               );
             }
 
@@ -294,7 +321,12 @@ class JwtStrategy {
               return resolve({ userId });
             }
 
-            return reject(new ErrorResponse('UNAUTHORIZED', 'Unauthorized'));
+            return reject(
+              new ErrorResponse({
+                code: 'UNAUTHORIZED',
+                message: 'Unauthorized',
+              }),
+            );
           });
         },
       );
