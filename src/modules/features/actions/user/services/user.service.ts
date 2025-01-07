@@ -12,43 +12,55 @@ import { PasswordUtils } from 'helpers';
 class UserService extends BaseService<IUserModel, UserRepository> {
   constructor() {
     const userRepo = new UserRepository(UserModel);
-    super(userRepo, false);
 
-    this.allowedFilterFields = ['verified', 'active'];
-    this.searchFields = ['firstname', 'lastname', 'email', 'phone'];
+    super(userRepo, {
+      filter: {
+        allowedFields: ['verified', 'active'],
+        defaultSort: { createdAt: -1 },
+      },
+      search: {
+        enabled: true,
+        fields: ['firstname', 'lastname', 'email', 'phone'],
+        caseSensitive: false,
+        fuzzySearch: false,
+      },
+      populate: {
+        fields: [],
+        defaultPopulate: false,
+      },
+    });
   }
 
   async isvalidPassword(
     userId: string,
     password: string,
-  ): Promise<SuccessResponseType<{ isValid: boolean }> | ErrorResponseType> {
+  ): Promise<SuccessResponseType<{ valid: boolean }> | ErrorResponseType> {
     try {
-      const response = (await this.findOne({
-        _id: userId,
-      })) as SuccessResponseType<IUserModel>;
+      const response = await this.findById(userId);
 
-      if (!response.success || !response.document) {
+      if (!response.success || !response.data) {
         LOGGER.error('Error password check', response);
         throw response.error;
       }
 
-      const userPassword = response.document.password;
-      const isValid = await PasswordUtils.comparePassword(
+      const user = response.data.docs as unknown as IUserModel;
+
+      const valid = await PasswordUtils.comparePassword(
         password,
-        userPassword,
+        user.password,
       );
 
-      return { success: true, document: { isValid } };
+      return { success: true, data: { valid } };
     } catch (error) {
       return {
         success: false,
         error:
           error instanceof ErrorResponse
             ? error
-            : new ErrorResponse(
-                'INTERNAL SERVER ERROR',
-                (error as Error).message,
-              ),
+            : new ErrorResponse({
+                code: 'INTERNAL SERVER ERROR',
+                message: (error as Error).message,
+              }),
       };
     }
   }
@@ -58,40 +70,34 @@ class UserService extends BaseService<IUserModel, UserRepository> {
     newPassword: string,
   ): Promise<SuccessResponseType<IUserModel> | ErrorResponseType> {
     try {
-      const response = (await this.findOne({
-        _id: userId,
-      })) as SuccessResponseType<IUserModel>;
+      const response = await this.findById(userId);
 
-      if (!response.success || !response.document) {
+      if (!response.success || !response.data) {
         LOGGER.error('Error password update', response);
         throw response.error;
       }
 
       const hashedPassword = await PasswordUtils.hashPassword(newPassword);
 
-      const updateResponse = (await this.update(
-        { _id: userId },
-        { password: hashedPassword },
-      )) as SuccessResponseType<IUserModel>;
+      const updateResponse = await this.updateById(userId, {
+        password: hashedPassword,
+      });
 
       if (!updateResponse.success) {
         throw updateResponse.error;
       }
 
-      return {
-        success: true,
-        document: updateResponse.document,
-      };
+      return updateResponse;
     } catch (error) {
       return {
         success: false,
         error:
           error instanceof ErrorResponse
             ? error
-            : new ErrorResponse(
-                'INTERNAL SERVER ERROR',
-                (error as Error).message,
-              ),
+            : new ErrorResponse({
+                code: 'INTERNAL SERVER ERROR',
+                message: (error as Error).message,
+              }),
       };
     }
   }
@@ -100,16 +106,17 @@ class UserService extends BaseService<IUserModel, UserRepository> {
     email: string,
   ): Promise<SuccessResponseType<{ verified: boolean }> | ErrorResponseType> {
     try {
-      const response = (await this.findOne({
-        email,
-      })) as SuccessResponseType<IUserModel>;
-      if (!response.success || !response.document) {
+      const response = await this.findOne({ email });
+
+      if (!response.success || !response.data) {
         throw response.error;
       }
 
+      const user = response.data.docs as unknown as IUserModel;
+
       return {
         success: true,
-        document: { verified: response.document.verified },
+        data: { verified: user.verified },
       };
     } catch (error) {
       return {
@@ -117,10 +124,10 @@ class UserService extends BaseService<IUserModel, UserRepository> {
         error:
           error instanceof ErrorResponse
             ? error
-            : new ErrorResponse(
-                'INTERVAL_SERVER_ERROR',
-                (error as Error).message,
-              ),
+            : new ErrorResponse({
+                code: 'INTERVAL_SERVER_ERROR',
+                message: (error as Error).message,
+              }),
       };
     }
   }
@@ -129,33 +136,31 @@ class UserService extends BaseService<IUserModel, UserRepository> {
     email: string,
   ): Promise<SuccessResponseType<IUserModel> | ErrorResponseType> {
     try {
-      const response = (await this.findOne({
-        email,
-      })) as SuccessResponseType<IUserModel>;
-      if (!response.success || !response.document) {
+      const response = await this.findOne({ email });
+
+      if (!response.success || !response.data) {
         throw response.error;
       }
 
-      const updateResponse = (await this.update(
-        { _id: response.document._id },
-        { verified: true },
-      )) as SuccessResponseType<IUserModel>;
+      const user = response.data.docs as unknown as IUserModel;
+
+      const updateResponse = await this.updateById(user.id, { verified: true });
 
       if (!updateResponse.success) {
         throw updateResponse.error;
       }
 
-      return {
-        success: true,
-        document: updateResponse.document,
-      };
+      return updateResponse;
     } catch (error) {
       return {
         success: false,
         error:
           error instanceof ErrorResponse
             ? error
-            : new ErrorResponse('UNKNOWN_ERROR', (error as Error).message),
+            : new ErrorResponse({
+                code: 'UNKNOWN_ERROR',
+                message: (error as Error).message,
+              }),
       };
     }
   }
