@@ -14,9 +14,9 @@ export const escapeRegex = (text: string): string => {
   return text.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
 };
 
-export const parseSortParam = (sortParam: string): Record<string, number> => {
+export const parseSortParam = (sortParam: string): Record<string, 1 | -1> => {
   const sortFields = sortParam.split(',');
-  const sortObj: Record<string, number> = {};
+  const sortObj: Record<string, 1 | -1> = {};
 
   sortFields.forEach((field) => {
     if (field.startsWith('-')) {
