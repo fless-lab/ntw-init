@@ -34,6 +34,33 @@ export interface Config {
     port: number;
     name: string;
     clientPort: number;
+    directUrl?: string;
+    credentials?: {
+      username?: string;
+      password?: string;
+      authSource?: string;
+    };
+    options?: {
+      replicaSet?: string;
+      maxPoolSize?: number;
+      minPoolSize?: number;
+      serverSelectionTimeoutMS?: number;
+      socketTimeoutMS?: number;
+      retryWrites?: boolean;
+      writeConcern?: {
+        w?: number | 'majority';
+        wtimeout?: number;
+      };
+    };
+    test?: {
+      host: string;
+      port: number;
+      name: string;
+      credentials?: {
+        username?: string;
+        password?: string;
+      };
+    };
   };
   redis: {
     host: string;
@@ -113,6 +140,48 @@ export class ConfigService {
         port: parseInt(process.env.DB_PORT || '27017', 10),
         name: process.env.DB_NAME || 'mydatabase',
         clientPort: parseInt(process.env.DB_CLIENT_PORT || '5005', 10),
+        directUrl: process.env.DB_DIRECT_URL,
+        credentials: {
+          username: process.env.DB_USERNAME,
+          password: process.env.DB_PASSWORD,
+          authSource: process.env.DB_AUTH_SOURCE,
+        },
+        options: {
+          replicaSet: process.env.DB_REPLICA_SET,
+          maxPoolSize: process.env.DB_MAX_POOL_SIZE
+            ? parseInt(process.env.DB_MAX_POOL_SIZE, 10)
+            : undefined,
+          minPoolSize: process.env.DB_MIN_POOL_SIZE
+            ? parseInt(process.env.DB_MIN_POOL_SIZE, 10)
+            : undefined,
+          serverSelectionTimeoutMS: process.env.DB_CONNECTION_TIMEOUT_MS
+            ? parseInt(process.env.DB_CONNECTION_TIMEOUT_MS, 10)
+            : undefined,
+          socketTimeoutMS: process.env.DB_SOCKET_TIMEOUT_MS
+            ? parseInt(process.env.DB_SOCKET_TIMEOUT_MS, 10)
+            : undefined,
+          retryWrites: process.env.DB_RETRY_WRITES === 'true',
+          writeConcern: {
+            w:
+              process.env.DB_WRITE_CONCERN === 'majority'
+                ? 'majority'
+                : process.env.DB_WRITE_CONCERN
+                  ? parseInt(process.env.DB_WRITE_CONCERN, 10)
+                  : 'majority',
+            wtimeout: process.env.DB_W_TIMEOUT_MS
+              ? parseInt(process.env.DB_W_TIMEOUT_MS, 10)
+              : undefined,
+          },
+        },
+        test: {
+          host: process.env.TEST_DB_HOST || 'localhost',
+          port: parseInt(process.env.TEST_DB_PORT || '27017', 10),
+          name: process.env.TEST_DB_NAME || 'test-db',
+          credentials: {
+            username: process.env.TEST_DB_USERNAME,
+            password: process.env.TEST_DB_PASSWORD,
+          },
+        },
       },
       redis: {
         host: process.env.REDIS_HOST || 'localhost',
