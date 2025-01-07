@@ -8,7 +8,10 @@ export const validateRequest = (schema: ObjectSchema) => {
     if (error) {
       const { details } = error;
       const message = details.map((i) => i.message).join(',');
-      const errorResponse = new ErrorResponse('VALIDATION_ERROR', message);
+      const errorResponse = new ErrorResponse({
+        code: 'VALIDATION_ERROR',
+        message,
+      });
       LOGGER.error(errorResponse.message, error);
       return ApiResponse.error(res, {
         success: false,
