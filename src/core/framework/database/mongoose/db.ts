@@ -1,8 +1,10 @@
 import { Config } from 'core/config';
 import mongoose, { Connection } from 'mongoose';
+
 interface ConnectionCredentials {
   username?: string;
   password?: string;
+  authSource?: string;
 }
 
 interface MongoDBConfig
@@ -11,6 +13,7 @@ interface MongoDBConfig
     host: string;
     port: number;
     name: string;
+    credentials?: ConnectionCredentials;
   };
   credentials?: ConnectionCredentials;
   directUrl?: string;
@@ -28,20 +31,27 @@ function buildConnectionUri(config: MongoDBConfig): string {
       ? `${encodeURIComponent(credentials.username)}:${encodeURIComponent(credentials.password)}@`
       : '';
 
-  return `mongodb://${auth}${config.host}:${config.port}`;
+  const authSource = credentials?.authSource
+    ? `?authSource=${credentials.authSource}`
+    : '';
+
+  return `mongodb://${auth}${config.host}:${config.port}${authSource}`;
 }
 
-async function connect(
-  dbConfig: MongoDBConfig,
-  options?: mongoose.ConnectOptions,
-): Promise<void> {
+async function connect(dbConfig: MongoDBConfig): Promise<void> {
   try {
     const uri = buildConnectionUri(dbConfig);
     const mongooseOptions: mongoose.ConnectOptions = {
       ...CONFIG.db?.options,
-      ...options,
       monitorCommands: true,
       dbName: dbConfig.name,
+      auth: dbConfig.credentials
+        ? {
+            username: dbConfig.credentials.username,
+            password: dbConfig.credentials.password,
+          }
+        : undefined,
+      authSource: dbConfig.credentials?.authSource,
     };
 
     const logUri = uri.replace(/\/\/(.*?@)?/, '//***@');
@@ -79,10 +89,14 @@ async function init(configOverride?: Partial<MongoDBConfig>): Promise<void> {
       port: CONFIG.db.port,
       name: CONFIG.db.name,
       clientPort: CONFIG.db.clientPort,
+      credentials: CONFIG.db.credentials,
+      directUrl: CONFIG.db.directUrl,
+      options: CONFIG.db.options,
       test: {
-        host: process.env.TEST_DB_HOST || CONFIG.db.host,
-        port: parseInt(process.env.TEST_DB_PORT || String(CONFIG.db.port)),
-        name: process.env.TEST_DB_NAME || 'test-db',
+        host: CONFIG.db.test?.host || CONFIG.db.host,
+        port: CONFIG.db.test?.port || CONFIG.db.port,
+        name: CONFIG.db.test?.name || 'test-db',
+        credentials: CONFIG.db.test?.credentials,
       },
       ...configOverride,
     };
