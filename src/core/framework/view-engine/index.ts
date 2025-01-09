@@ -3,11 +3,11 @@ import { Application } from 'express';
 export const initializeViewEngine = async (
   app: Application = APP,
 ): Promise<void> => {
-  const viewEngine = CONFIG.defaultViewEngine;
+  const viewEngine = CONFIG.views.defaultEngine;
 
-  if (!CONFIG.viewEngines.includes(viewEngine)) {
+  if (!CONFIG.views.engines.includes(viewEngine)) {
     throw new Error(
-      `View engine ${viewEngine} is not supported. Please choose one of the following: ${CONFIG.viewEngines.join(', ')}.`,
+      `View engine ${viewEngine} is not supported. Please choose one of the following: ${CONFIG.views.engines.join(', ')}.`,
     );
   }
 

@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -95,8 +96,12 @@ export interface Config {
   session: {
     secret: string;
   };
-  viewEngines: string[];
-  defaultViewEngine: string;
+  views: {
+    engines: string[];
+    defaultEngine: string;
+    viewsDir: string;
+    publicDir: string;
+  };
   otp: {
     length: number;
     expiration: number;
@@ -240,8 +245,18 @@ export class ConfigService {
       session: {
         secret: process.env.SESSION_SECRET || 'your-session-secret',
       },
-      viewEngines: ['ejs', 'pug', 'handlebars', 'nunjucks'], // Supported view engines
-      defaultViewEngine: process.env.VIEW_ENGINE || 'ejs',
+      views: {
+        engines: ['ejs', 'pug', 'handlebars', 'nunjucks'],
+        defaultEngine: process.env.VIEW_ENGINE || 'njk',
+        viewsDir: path.join(
+          process.cwd(),
+          process.env.VIEW_VIEWS_DIR || 'views',
+        ),
+        publicDir: path.join(
+          process.cwd(),
+          process.env.VIEW_PUBLIC_DIR || 'public',
+        ),
+      },
       otp: {
         length: parseInt(process.env.OTP_LENGTH || '6', 10),
         expiration: parseInt(process.env.OTP_EXPIRATION || '5') * 60 * 1000,
