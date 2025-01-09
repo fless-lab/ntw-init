@@ -84,6 +84,10 @@ export interface Config {
     pass: string;
     from: string;
     fromName: string;
+    templates: {
+      path: string;
+      cache: boolean;
+    };
   };
   bcrypt: {
     saltRounds: number;
@@ -225,6 +229,10 @@ export class ConfigService {
             : '',
         from: process.env.FROM_EMAIL || 'no-reply@myapp.com',
         fromName: process.env.FROM_NAME || 'Your Service Name',
+        templates: {
+          path: process.env.MAIL_TEMPLATES_PATH || 'views',
+          cache: process.env.NODE_ENV === 'production',
+        },
       },
       bcrypt: {
         saltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10),
