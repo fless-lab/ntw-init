@@ -1,3 +1,1 @@
-import authRoutes from './auth.routes';
-
-export { authRoutes };
+export { default as AuthRoutes } from './auth.routes';
