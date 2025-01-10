@@ -235,7 +235,7 @@ export class ConfigService {
         from: process.env.FROM_EMAIL || 'no-reply@myapp.com',
         fromName: process.env.FROM_NAME || 'Your Service Name',
         templates: {
-          path: process.env.MAIL_TEMPLATES_PATH || 'views',
+          path: process.env.MAIL_TEMPLATES_PATH || 'templates',
           cache: process.env.NODE_ENV === 'production',
         },
       },
