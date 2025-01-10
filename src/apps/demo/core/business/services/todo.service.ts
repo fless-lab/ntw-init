@@ -1,11 +1,11 @@
-import { TodoRepository } from '../repositories';
-import { ITodoModel, TodoModel } from 'apps/demo/core/domain';
-import { parseSortParam } from 'helpers';
+import { BaseService } from '@nodesandbox/repo-framework';
 import {
   ErrorResponseType,
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
-import { BaseService } from '@nodesandbox/repo-framework';
+import { ITodoModel, TodoModel } from 'apps/demo/core/domain';
+import { parseSortParam } from 'helpers';
+import { TodoRepository } from '../repositories';
 
 class TodoService extends BaseService<ITodoModel, TodoRepository> {
   constructor() {
@@ -13,7 +13,7 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
     super(todoRepo, true, [
       /*'attribute_to_populate'*/
     ]); // This will populate the entity field
-    this.allowedFilterFields = ['dueDate', 'completed', 'priority']; // To filter on these fields, we need to set this
+    this.allowedFilterFields = ['dueDate', 'completed', 'priority', 'image']; // To filter on these fields, we need to set this
     this.searchFields = ['title', 'description']; // This will use the search keyword
 
     /**
@@ -34,6 +34,7 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
       search = '',
       priority,
       completed,
+      image,
       upcoming,
     } = filters;
 
@@ -42,6 +43,12 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
     if (priority) query.priority = priority;
     if (completed !== undefined) query.completed = completed === 'true';
 
+    if (image !== 'true') {
+      query.image = { $exists: false };
+    } else {
+      query.image = { $exists: true, $ne: null };
+    }
+
     // Handle upcoming due dates
     if (upcoming) {
       const days = parseInt(upcoming as string) || 7;
@@ -49,6 +56,8 @@ class TodoService extends BaseService<ITodoModel, TodoRepository> {
       futureDate.setDate(futureDate.getDate() + days);
       query.dueDate = { $gte: new Date(), $lte: futureDate };
     }
+
+    console.log('⚔️⚔️⚔️⚔️⚔️⚔️ query : ', query);
 
     // Parse sorting parameter using helper function
     const sortObject = sort ? parseSortParam(sort) : {};

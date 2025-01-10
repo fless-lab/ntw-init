@@ -101,9 +101,8 @@ class FileService extends BaseService<IFileModel, FileRepository> {
 
         const response = await storage.disk.getFile(fileDiskName);
 
-        return { success: true, document: response };
+        return { success: true, document: response.data };
       } else {
-        console.log('❌❌❌❌❌❌');
         const file = await this.repository.findOne({ _id: fileId });
 
         if (!file) {
@@ -120,7 +119,7 @@ class FileService extends BaseService<IFileModel, FileRepository> {
           originalname,
         );
 
-        return { success: true, document: payload };
+        return { success: true, document: payload.data };
       }
     } catch (error) {
       return {

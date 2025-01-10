@@ -72,6 +72,9 @@ export class TodoController {
   ): Promise<void> {
     try {
       const filters = req.query; // Extract query params for filtering.
+
+      console.log('⚡⚡⚡⚡☂️☂️☂️☂️ filters : ', filters);
+
       const response = await TodoService.getTodos(filters);
 
       if (response.success) {
