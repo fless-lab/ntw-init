@@ -31,7 +31,7 @@ class AuthController {
         throw response.error;
       }
 
-      ApiResponse.success(res, response);
+      ApiResponse.success(res, response, 201);
     } catch (error) {
       ApiResponse.error(res, {
         success: false,
@@ -57,7 +57,7 @@ class AuthController {
         throw response.error;
       }
 
-      ApiResponse.success(res, response);
+      ApiResponse.success(res, response, 202);
     } catch (error) {
       ApiResponse.error(res, {
         success: false,
