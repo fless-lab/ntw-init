@@ -36,14 +36,14 @@ class MailServiceUtilities {
 
   static async sendAccountCreationEmail({
     to,
-    firstname,
+    data,
   }: {
     to: string;
-    firstname: string;
+    data: any;
   }): Promise<SuccessResponseType<void> | ErrorResponseType> {
     const subject = 'Welcome to Our Service';
     const htmlTemplate = 'welcome';
-    const templateData = { firstname };
+    const templateData = { data };
 
     return await MailService.sendMail({
       to,
