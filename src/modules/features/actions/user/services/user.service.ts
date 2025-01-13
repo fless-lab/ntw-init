@@ -1,13 +1,13 @@
 import { BaseService } from '@nodesandbox/repo-framework';
-import { IUserModel } from '../types';
-import { UserRepository } from '../repositories';
-import { UserModel } from '../models';
 import {
   ErrorResponse,
   ErrorResponseType,
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
 import { PasswordUtils } from 'helpers';
+import { UserModel } from '../models';
+import { UserRepository } from '../repositories';
+import { IUserModel } from '../types';
 
 class UserService extends BaseService<IUserModel, UserRepository> {
   constructor() {
@@ -44,7 +44,6 @@ class UserService extends BaseService<IUserModel, UserRepository> {
       }
 
       const user = response.data.docs as unknown as IUserModel;
-
       const valid = await PasswordUtils.comparePassword(
         password,
         user.password,
