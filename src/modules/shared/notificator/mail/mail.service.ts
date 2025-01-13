@@ -3,8 +3,7 @@ import {
   ErrorResponseType,
   ErrorResponse,
 } from '@nodesandbox/response-kit';
-import fs from 'fs';
-import handlebars from 'handlebars';
+import nunjucks from 'nunjucks';
 import nodemailer, { Transporter } from 'nodemailer';
 import path from 'path';
 
@@ -12,6 +11,11 @@ class MailService {
   private transporter: Transporter;
 
   constructor() {
+    nunjucks.configure(path.join(process.cwd(), CONFIG.mail.templates.path), {
+      autoescape: true,
+      noCache: !CONFIG.runningProd,
+    });
+
     this.transporter = nodemailer.createTransport({
       host: CONFIG.mail.host,
       port: CONFIG.mail.port,
@@ -45,15 +49,10 @@ class MailService {
     try {
       let htmlContent;
       if (htmlTemplate) {
-        const templatePath = path.join(
-          process.cwd(),
-          'src/templates/mail',
+        htmlContent = nunjucks.render(
           `${htmlTemplate}.html`,
+          templateData || {},
         );
-
-        const templateSource = fs.readFileSync(templatePath, 'utf-8');
-        const template = handlebars.compile(templateSource);
-        htmlContent = template(templateData);
       }
 
       const mailOptions = {
@@ -79,7 +78,7 @@ class MailService {
           suggestions: ['Please try again later.'],
           originalError: error as Error,
         }),
-      };
+      } as ErrorResponseType;
     }
   }
 }
