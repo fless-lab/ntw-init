@@ -10,10 +10,12 @@ import { MailServiceUtilities } from 'modules/shared/notificator/mail';
 
 class AuthService {
   async register(payload: any) {
+    let createdUserId: string | null = null;
+
     try {
       const { email } = payload;
 
-      const userResponse = await UserService.exists({ email: email });
+      const userResponse = await UserService.exists({ email });
 
       if (userResponse === true) {
         throw new ErrorResponse({
@@ -25,14 +27,9 @@ class AuthService {
 
       const createUserResponse = (await UserService.create(payload)) as any;
 
-      if (!createUserResponse.success || !createUserResponse.data?.docs) {
+      if (!createUserResponse.success) {
         throw createUserResponse.error;
       }
-
-      await MailServiceUtilities.sendAccountCreationEmail({
-        to: email,
-        firstname: createUserResponse.data.docs.firstname,
-      });
 
       const otpResponse = (await OTPService.generate(
         email,
@@ -43,6 +40,28 @@ class AuthService {
         throw otpResponse.error;
       }
 
+      createdUserId = createUserResponse.data.docs.id;
+
+      const mailData = {
+        firstname: createUserResponse.data.docs.firstname,
+        otp: otpResponse.data.code,
+      };
+
+      const mailResponse = await MailServiceUtilities.sendAccountCreationEmail({
+        to: email,
+        data: mailData,
+      });
+
+      if (!mailResponse.success) {
+        LOGGER.error('Failed to send verification email', mailResponse.error);
+        throw new ErrorResponse({
+          code: 'EMAIL_DELIVERY_ERROR',
+          message: 'Failed to send verification email. Please try again later.',
+          statusCode: 500,
+          originalError: mailResponse.error,
+        });
+      }
+
       return {
         success: true,
         data: {
@@ -51,6 +70,23 @@ class AuthService {
         },
       };
     } catch (error) {
+      if (createdUserId) {
+        try {
+          const _ = await UserService.deleteById(createdUserId);
+          if (!_.success) {
+            throw _.error;
+          }
+          LOGGER.info(`Rolled back user creation for ID: ${createdUserId}`);
+        } catch (deleteError) {
+          LOGGER.file(
+            'FAILED_USER_CREATION_ROLLBACK',
+            `${deleteError} | ${createdUserId}`,
+          );
+        }
+      }
+
+      LOGGER.error('Registration process failed', error);
+
       return {
         success: false,
         error:
@@ -58,8 +94,9 @@ class AuthService {
             ? error
             : new ErrorResponse({
                 code: 'INTERNAL_SERVER_ERROR',
-                message: (error as Error).message,
+                message: 'An unexpected error occurred during registration.',
                 statusCode: 500,
+                originalError: error as Error,
               }),
       };
     }
