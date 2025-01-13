@@ -1,17 +1,19 @@
-import { Request, Response } from 'express';
 import { ApiResponse, ErrorResponseType } from '@nodesandbox/response-kit';
+import { Request, Response } from 'express';
 import { sanitize } from 'helpers';
+import { AuthService } from 'modules/authz/authentication/services';
+import { OTPService } from 'modules/features/actions';
 import {
-  RegisterRequestSchema,
-  LoginRequestSchema,
-  VerifyAccountRequestSchema,
+  ForgotPasswordRequestSchema,
   GenerateOtpRequestSchema,
   LoginOtpRequestSchema,
+  LoginRequestSchema,
   RefreshTokenRequestSchema,
-  ForgotPasswordRequestSchema,
+  RegisterRequestSchema,
   ResetPasswordRequestSchema,
+  ValidateOTPRequestSchema,
+  VerifyAccountRequestSchema,
 } from '../dtos/request';
-import { AuthService } from 'modules/authz/authentication/services';
 
 class AuthController {
   /**
@@ -229,6 +231,52 @@ class AuthController {
 
       const response = await AuthService.resetPassword(_payload.data);
 
+      if (!response.success) {
+        throw response.error;
+      }
+
+      ApiResponse.success(res, response);
+    } catch (error) {
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
+    }
+  }
+
+  static async generateOTP(req: Request, res: Response): Promise<void> {
+    try {
+      const _payload = sanitize(req.body, GenerateOtpRequestSchema);
+
+      if (!_payload.success) {
+        throw _payload.error;
+      }
+      const { email, purpose } = _payload.data;
+
+      const response = await OTPService.generate(email, purpose);
+      if (!response.success) {
+        throw response.error;
+      }
+
+      ApiResponse.success(res, response);
+    } catch (error) {
+      ApiResponse.error(res, {
+        success: false,
+        error: error,
+      } as ErrorResponseType);
+    }
+  }
+
+  static async validateOTP(req: Request, res: Response): Promise<void> {
+    try {
+      const _payload = sanitize(req.body, ValidateOTPRequestSchema);
+
+      if (!_payload.success) {
+        throw _payload.error;
+      }
+
+      const { email, code, purpose } = _payload.data;
+      const response = await OTPService.validate(email, code, purpose);
       if (!response.success) {
         throw response.error;
       }

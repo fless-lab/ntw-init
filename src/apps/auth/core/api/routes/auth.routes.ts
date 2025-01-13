@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { AuthController } from '../controllers';
 import { authenticate } from 'modules/authz/authentication/middlewares';
+import { AuthController } from '../controllers';
 
 const router = Router();
 
@@ -58,5 +58,17 @@ router.post('/forgot-password', AuthController.forgotPassword);
  * POST /auth/reset-password
  */
 router.post('/reset-password', AuthController.resetPassword);
+
+/**
+ * Route for reset password
+ * POST /auth/otp/generate
+ */
+router.post('/otp/generate', AuthController.generateOTP);
+
+/**
+ * Route for reset password
+ * POST /auth/otp/validate
+ */
+router.post('/otp/validate', AuthController.validateOTP);
 
 export default router;
