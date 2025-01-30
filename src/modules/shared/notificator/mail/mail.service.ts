@@ -111,14 +111,10 @@ class MailService {
   public async sendMail(options: IEmailOptions): Promise<IEmailResponse> {
     try {
       await this.validateConnection();
-      console.log('options', options);
       const { subject, text, html } = await this.renderTemplate(
         options.template,
         options.data as ITemplateData,
       );
-      console.log('subject', subject);
-      console.log('text', text);
-      console.log('html', html);
       const mailOptions = {
         from: `"${CONFIG.mail.fromName}" <${CONFIG.mail.from}>`,
         to: this.formatRecipients(options.to),
@@ -132,7 +128,6 @@ class MailService {
         html,
         attachments: options.attachments,
       };
-      console.log('mailOptions', mailOptions);
       const result = await this.transporter.sendMail(mailOptions);
 
       return {
