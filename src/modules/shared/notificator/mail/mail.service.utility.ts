@@ -65,7 +65,7 @@ class MailServiceUtilities {
       code: string;
     };
   }): Promise<IEmailResponse> {
-    return await this.sendMail({
+    const options = {
       to,
       template: EmailTemplate.ACCOUNT_CREATION,
       data: {
@@ -74,7 +74,8 @@ class MailServiceUtilities {
         appName: CONFIG.app,
         expiresIn: CONFIG.otp.expiration / 60000,
       },
-    });
+    };
+    return await this.sendMail(options);
   }
 
   static async sendPasswordResetEmail({
