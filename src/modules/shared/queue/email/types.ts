@@ -1,3 +1,5 @@
+import { Job, JobOptions, JobId, JobStatus } from 'bull';
+
 export interface IEmailJobData {
   to: string;
   template: EmailTemplate;
@@ -6,6 +8,8 @@ export interface IEmailJobData {
     userId?: string;
     priority?: number;
     category?: string;
+    timestamp?: number;
+    version?: string;
   };
 }
 
@@ -16,9 +20,13 @@ export interface IEmailJobResult {
   timestamp: number;
 }
 
+export type JobState = JobStatus | 'stuck';
+
+export type IEmailJob = Job<IEmailJobData>;
+
 export interface IEmailJobStatus {
-  id: string;
-  state: string;
+  id: JobId;
+  state: JobState;
   progress: number;
   attempts: number;
   failedReason?: string;
@@ -72,4 +80,8 @@ export interface IQueueMetrics {
   failed: number;
   delayed: number;
   paused: number;
+}
+
+export interface IEmailQueueOptions extends JobOptions {
+  priority?: EmailJobPriority;
 }
