@@ -1,15 +1,16 @@
-import { OTPModel } from '../models';
-import { generateRandomCode } from 'helpers';
-import { IUserModel } from '../../user/types';
-import { OTPRepository } from '../repositories';
-import { IOTPModel, TOTPPurpose } from '../types';
-import { UserService } from 'modules/features/actions';
 import { BaseService } from '@nodesandbox/repo-framework';
 import {
   ErrorResponse,
   ErrorResponseType,
   SuccessResponseType,
 } from '@nodesandbox/response-kit';
+import { generateRandomCode } from 'helpers';
+import { UserService } from 'modules/features/actions';
+import { MailServiceUtilities } from 'modules/shared/notificator';
+import { IUserModel } from '../../user/types';
+import { OTPModel } from '../models';
+import { OTPRepository } from '../repositories';
+import { IOTPModel, TOTPPurpose } from '../types';
 
 class OTPService extends BaseService<IOTPModel, OTPRepository> {
   constructor() {
@@ -38,15 +39,15 @@ class OTPService extends BaseService<IOTPModel, OTPRepository> {
         purpose,
       });
 
-      // const mailResponse = await MailServiceUtilities.sendOtp({
-      //   to: user.email,
-      //   code: otp.code,
-      //   purpose,
-      // });
+      const mailResponse = await MailServiceUtilities.sendOtp({
+        to: user.email,
+        code: otp.code,
+        purpose,
+      });
 
-      // if (!mailResponse.success) {
-      //   throw mailResponse.error;
-      // }
+      if (!mailResponse.success) {
+        throw mailResponse.error;
+      }
 
       return { success: true, data: otp };
     } catch (error) {

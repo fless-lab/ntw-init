@@ -8,6 +8,7 @@ import { OTPService, UserService } from 'modules/features/actions';
 import { IOTPModel } from 'modules/features/actions/otp/types';
 import EmailQueueService from 'modules/shared/queue/email/email.queue.service';
 import { EmailTemplate } from 'modules/shared/queue/email/types';
+import { IUserModel } from 'modules/features/actions/user/types';
 
 class AuthService {
   async register(payload: any) {
@@ -205,25 +206,21 @@ class AuthService {
   async loginWithPassword(payload: any) {
     try {
       const { email, password } = payload;
-      const userResponse = (await UserService.findOne({
+      const userResponse = await UserService.findOne({
         email,
-      })) as any;
+      });
 
-      if (!userResponse.success || !userResponse.data?.docs) {
-        throw new ErrorResponse({
-          code: 'UNAUTHORIZED',
-          message: 'Invalid credentials.',
-          // statusCode: 401,
-        });
+      if (!userResponse.success) {
+        throw userResponse.error;
       }
 
-      const user = userResponse.data.docs;
+      const user = userResponse.data?.docs as unknown as IUserModel;
       const isValidPasswordResponse = await UserService.isvalidPassword(
         user.id,
         password,
       );
 
-      const isValid = isValidPasswordResponse?.data?.isValid;
+      const isValid = isValidPasswordResponse?.data?.valid;
 
       if (!isValid) {
         throw new ErrorResponse({
