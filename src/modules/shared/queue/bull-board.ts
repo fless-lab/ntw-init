@@ -3,13 +3,13 @@ import { BullAdapter } from '@bull-board/api/bullAdapter';
 import { ExpressAdapter } from '@bull-board/express';
 import { emailQueue } from './email/email.queue';
 
-const serverAdapter = new ExpressAdapter();
+const BullServerAdapter = new ExpressAdapter();
 
 createBullBoard({
   queues: [new BullAdapter(emailQueue)],
-  serverAdapter,
+  serverAdapter: BullServerAdapter,
 });
 
-serverAdapter.setBasePath('/checker/admin/queues');
+BullServerAdapter.setBasePath('/checker/admin/queues');
 
-export { serverAdapter };
+export { BullServerAdapter };
