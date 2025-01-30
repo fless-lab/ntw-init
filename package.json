@@ -51,6 +51,8 @@
   "author": "Abdou-Raouf ATARMLA",
   "license": "ISC",
   "dependencies": {
+    "@bull-board/api": "^6.7.2",
+    "@bull-board/express": "^6.7.2",
     "@nodesandbox/async-storage": "^0.1.1",
     "@nodesandbox/logger": "^0.1.2",
     "@nodesandbox/repo-framework": "^1.4.0",
