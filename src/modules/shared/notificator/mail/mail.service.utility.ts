@@ -1,11 +1,28 @@
 import {
-  ErrorResponse,
-  ErrorResponseType,
-  SuccessResponseType,
-} from '@nodesandbox/response-kit';
+  IEmailOptions,
+  IEmailResponse,
+  EmailError,
+  EmailErrorCode,
+} from './types';
+import { EmailTemplate } from './templates';
 import MailService from './mail.service';
 
 class MailServiceUtilities {
+  static async sendMail(options: IEmailOptions): Promise<IEmailResponse> {
+    try {
+      return await MailService.sendMail(options);
+    } catch (error) {
+      if (error instanceof EmailError) {
+        throw error;
+      }
+      throw new EmailError(
+        'Failed to send email',
+        EmailErrorCode.PROVIDER_ERROR,
+        true,
+      );
+    }
+  }
+
   static async sendOtp({
     to,
     code,
@@ -14,24 +31,26 @@ class MailServiceUtilities {
     to: string;
     code: string;
     purpose: string;
-  }): Promise<SuccessResponseType<void> | ErrorResponseType> {
+  }): Promise<IEmailResponse> {
     const otpPurpose = CONFIG.otp.purposes[purpose];
     if (!otpPurpose) {
-      return {
-        success: false,
-        error: new ErrorResponse({
-          code: 'BAD_REQUEST',
-          message: 'Invalid OTP purpose provided',
-        }),
-      };
+      throw new EmailError(
+        'Invalid OTP purpose provided',
+        EmailErrorCode.TEMPLATE_NOT_FOUND,
+        false,
+      );
     }
 
-    const subject = otpPurpose.title;
-    const text = `${otpPurpose.message} ${code}\n\nThis code is valid for ${
-      CONFIG.otp.expiration / 60000
-    } minutes.`;
-
-    return await MailService.sendMail({ to, subject, text });
+    return await this.sendMail({
+      to,
+      template: EmailTemplate.OTP,
+      data: {
+        subject: otpPurpose.title,
+        code,
+        purpose: otpPurpose.message,
+        expiresIn: CONFIG.otp.expiration / 60000,
+      },
+    });
   }
 
   static async sendAccountCreationEmail({
@@ -39,17 +58,61 @@ class MailServiceUtilities {
     data,
   }: {
     to: string;
-    data: any;
-  }): Promise<SuccessResponseType<void> | ErrorResponseType> {
-    const subject = 'Welcome to Our Service';
-    const htmlTemplate = 'welcome';
-    const templateData = { data };
-
-    return await MailService.sendMail({
+    data: {
+      name: string;
+      email: string;
+      verificationUrl: string;
+    };
+  }): Promise<IEmailResponse> {
+    return await this.sendMail({
       to,
-      subject,
-      htmlTemplate,
-      templateData,
+      template: EmailTemplate.ACCOUNT_CREATION,
+      data: {
+        subject: 'Welcome to Our Service',
+        ...data,
+      },
+    });
+  }
+
+  static async sendPasswordResetEmail({
+    to,
+    data,
+  }: {
+    to: string;
+    data: {
+      name: string;
+      resetUrl: string;
+      expiresIn: number;
+    };
+  }): Promise<IEmailResponse> {
+    return await this.sendMail({
+      to,
+      template: EmailTemplate.PASSWORD_RESET,
+      data: {
+        subject: 'Reset Your Password',
+        ...data,
+      },
+    });
+  }
+
+  static async sendEmailVerification({
+    to,
+    data,
+  }: {
+    to: string;
+    data: {
+      name: string;
+      verificationUrl: string;
+      expiresIn: number;
+    };
+  }): Promise<IEmailResponse> {
+    return await this.sendMail({
+      to,
+      template: EmailTemplate.EMAIL_VERIFICATION,
+      data: {
+        subject: 'Verify Your Email',
+        ...data,
+      },
     });
   }
 }
