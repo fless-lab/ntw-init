@@ -11,14 +11,21 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+        .code {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 5px;
             margin: 20px 0;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        .expiry {
+            color: #6c757d;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 10px;
         }
         .footer {
             margin-top: 40px;
@@ -36,12 +43,11 @@
     
     <p>Your account has been successfully created with the email address: <strong>{{ email }}</strong>.</p>
     
-    <p>To get started, please verify your email address by clicking the button below:</p>
+    <p>To verify your account, please use this verification code:</p>
     
-    <a href="{{ verificationUrl }}" class="button">Verify Email Address</a>
+    <div class="code">{{ code }}</div>
     
-    <p>Or copy and paste this link in your browser:</p>
-    <p style="word-break: break-all;">{{ verificationUrl }}</p>
+    <p class="expiry">This code will expire in {{ expiresIn }} minutes</p>
     
     <p>If you did not create this account, please ignore this email.</p>
     
