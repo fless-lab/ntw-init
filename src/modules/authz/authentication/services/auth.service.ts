@@ -11,8 +11,6 @@ import { EmailTemplate } from 'modules/shared/queue/email/types';
 
 class AuthService {
   async register(payload: any) {
-    let createdUserId: string | null = null;
-
     try {
       const { email } = payload;
 
@@ -41,11 +39,13 @@ class AuthService {
         throw otpResponse.error;
       }
 
-      createdUserId = createUserResponse.data.docs.id;
+      const createdUser = createUserResponse.data.docs;
+      const otp = otpResponse.data;
 
       const mailData = {
-        firstname: createUserResponse.data.docs.firstname,
-        otp: otpResponse.data.code,
+        name: `${createdUser.firstname} ${createdUser.lastname}`,
+        email: email,
+        code: otp.code,
       };
 
       const mailResponse = await EmailQueueService.addToQueue({
@@ -73,23 +73,7 @@ class AuthService {
         },
       };
     } catch (error) {
-      if (createdUserId) {
-        try {
-          const _ = await UserService.deleteById(createdUserId);
-          if (!_.success) {
-            throw _.error;
-          }
-          LOGGER.info(`Rolled back user creation for ID: ${createdUserId}`);
-        } catch (deleteError) {
-          LOGGER.file(
-            'FAILED_USER_CREATION_ROLLBACK',
-            `${deleteError} | ${createdUserId}`,
-          );
-        }
-      }
-
       LOGGER.error('Registration process failed', error);
-
       return {
         success: false,
         error:
