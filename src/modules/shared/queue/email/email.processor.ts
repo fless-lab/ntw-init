@@ -8,7 +8,6 @@ export class EmailJobProcessor {
     const { to, template, data, metadata } = job.data;
 
     try {
-      // Log détaillé des données d'entrée
       LOGGER.info(`Processing email job ${job.id}`, {
         template,
         to,
@@ -57,7 +56,6 @@ export class EmailJobProcessor {
           timestamp: Date.now(),
         };
       } catch (sendError) {
-        // Log spécifique pour les erreurs d'envoi
         LOGGER.error(`Mail service error for job ${job.id}`, {
           error:
             sendError instanceof Error
@@ -75,7 +73,6 @@ export class EmailJobProcessor {
     } catch (error) {
       const processingTime = Date.now() - startTime;
 
-      // Log détaillé de l'erreur
       const errorDetails =
         error instanceof Error
           ? {
@@ -92,7 +89,6 @@ export class EmailJobProcessor {
         data,
       });
 
-      // Log dans un fichier pour debug
       LOGGER.file('EMAIL_JOB_PROCESSING_ERROR', {
         error: errorDetails,
         processingTime,
