@@ -24,7 +24,7 @@ export class EmailJobProcessor {
       await job.progress(100);
 
       if (!result.success) {
-        throw new Error(result.error);
+        throw result.error;
       }
 
       const processingTime = Date.now() - startTime;
@@ -42,6 +42,12 @@ export class EmailJobProcessor {
     } catch (error) {
       const processingTime = Date.now() - startTime;
       LOGGER.error(`Failed to process email job ${job.id}`, {
+        error,
+        processingTime,
+        template,
+        metadata,
+      });
+      LOGGER.file('EMAIL_JOB_PROCESSING_ERROR', {
         error,
         processingTime,
         template,
