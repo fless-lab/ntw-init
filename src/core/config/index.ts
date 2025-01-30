@@ -69,6 +69,45 @@ export interface Config {
     serverPort: number;
     tokenExpireTime: number;
     blacklistExpireTime: number;
+    tls: boolean;
+    password?: string;
+  };
+  queues: {
+    email: {
+      name: string;
+      concurrency: number;
+      limiter: {
+        max: number;
+        duration: number;
+      };
+      defaultJobOptions: {
+        attempts: number;
+        backoff: {
+          type: string;
+          delay: number;
+        };
+        timeout: number;
+        removeOnComplete: {
+          age: number;
+          count: number;
+        };
+        removeOnFail: {
+          age: number;
+        };
+      };
+      monitoring: {
+        checkInterval: number;
+        maxStallCount: number;
+      };
+    };
+    admin: {
+      enabled: boolean;
+      path: string;
+      credentials: {
+        username: string;
+        password: string;
+      };
+    };
   };
   minio: {
     host: string;
@@ -204,6 +243,69 @@ export class ConfigService {
           process.env.REDIS_BLACKLIST_EXPIRE_TIME || '2592000',
           10,
         ),
+        tls: process.env.REDIS_TLS === 'true',
+        password: process.env.REDIS_PASSWORD,
+      },
+      queues: {
+        email: {
+          name: process.env.EMAIL_QUEUE_NAME || 'email-queue',
+          concurrency: parseInt(process.env.EMAIL_QUEUE_CONCURRENCY || '3', 10),
+          limiter: {
+            max: parseInt(process.env.EMAIL_QUEUE_RATE_LIMIT_MAX || '50', 10),
+            duration: parseInt(
+              process.env.EMAIL_QUEUE_RATE_LIMIT_DURATION || '1000',
+              10,
+            ),
+          },
+          defaultJobOptions: {
+            attempts: parseInt(process.env.EMAIL_QUEUE_JOB_ATTEMPTS || '3', 10),
+            backoff: {
+              type: process.env.EMAIL_QUEUE_BACKOFF_TYPE || 'exponential',
+              delay: parseInt(
+                process.env.EMAIL_QUEUE_BACKOFF_DELAY || '1000',
+                10,
+              ),
+            },
+            timeout: parseInt(
+              process.env.EMAIL_QUEUE_JOB_TIMEOUT || '30000',
+              10,
+            ),
+            removeOnComplete: {
+              age: parseInt(
+                process.env.EMAIL_QUEUE_KEEP_COMPLETED_AGE || '86400',
+                10,
+              ), // 24 hours
+              count: parseInt(
+                process.env.EMAIL_QUEUE_KEEP_COMPLETED_COUNT || '1000',
+                10,
+              ),
+            },
+            removeOnFail: {
+              age: parseInt(
+                process.env.EMAIL_QUEUE_KEEP_FAILED_AGE || '604800',
+                10,
+              ), // 7 days
+            },
+          },
+          monitoring: {
+            checkInterval: parseInt(
+              process.env.EMAIL_QUEUE_CHECK_INTERVAL || '30000',
+              10,
+            ),
+            maxStallCount: parseInt(
+              process.env.EMAIL_QUEUE_MAX_STALL_COUNT || '2',
+              10,
+            ),
+          },
+        },
+        admin: {
+          enabled: process.env.QUEUE_ADMIN_ENABLED === 'true',
+          path: process.env.QUEUE_ADMIN_PATH || '/admin/queues',
+          credentials: {
+            username: process.env.QUEUE_ADMIN_USERNAME || 'admin',
+            password: process.env.QUEUE_ADMIN_PASSWORD || 'admin',
+          },
+        },
       },
       minio: {
         host: process.env.MINIO_HOST || 'localhost',
