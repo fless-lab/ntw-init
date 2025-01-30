@@ -11,6 +11,7 @@ import {
 } from 'core/framework';
 import { helmetCSPConfig } from 'core/constants';
 import { GlobalErrorHandler, NotFoundHandler } from '@nodesandbox/response-kit';
+import { BullServerAdapter } from 'modules/shared/queue';
 
 const app = express();
 const AllRoutes = AppModule.getRouter();
@@ -47,6 +48,9 @@ app.use(SharedMiddlewares.enableRateLimiter);
 
 // API Routes
 app.use('/api/v1', AllRoutes);
+
+// Bull Board UI (avant les error handlers pour éviter les 404)
+app.use('/checker/admin/queues', BullServerAdapter.getRouter());
 
 // Error handlers
 app.use(NotFoundHandler);
