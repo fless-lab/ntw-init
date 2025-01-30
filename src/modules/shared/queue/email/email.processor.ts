@@ -26,13 +26,11 @@ export class EmailJobProcessor {
       await job.progress(10);
 
       try {
-        console.log('Before mail action', to, template, data);
         const result = await MailServiceUtilities.sendMail({
           to,
           template,
           data,
         });
-        console.log('After mail action', result);
         await job.progress(100);
 
         if (!result.success) {
