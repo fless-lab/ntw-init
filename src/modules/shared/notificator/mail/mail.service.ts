@@ -1,22 +1,40 @@
-import {
-  SuccessResponseType,
-  ErrorResponseType,
-  ErrorResponse,
-} from '@nodesandbox/response-kit';
+import { Transporter, createTransport } from 'nodemailer';
 import nunjucks from 'nunjucks';
-import nodemailer, { Transporter } from 'nodemailer';
 import path from 'path';
+import {
+  IEmailOptions,
+  IEmailResponse,
+  IEmailTemplate,
+  EmailError,
+  EmailErrorCode,
+  IEmailRecipient,
+  ITemplateData,
+} from './types';
 
 class MailService {
-  private transporter: Transporter;
+  private transporter!: Transporter;
+  private templateEngine!: typeof nunjucks;
+  private static instance: MailService | null = null;
 
-  constructor() {
-    nunjucks.configure(path.join(process.cwd(), CONFIG.mail.templates.path), {
-      autoescape: true,
-      noCache: !CONFIG.runningProd,
-    });
+  private constructor() {
+    this.initializeTemplateEngine();
+    this.initializeTransporter();
+  }
 
-    this.transporter = nodemailer.createTransport({
+  private initializeTemplateEngine(): void {
+    this.templateEngine = nunjucks;
+    this.templateEngine.configure(
+      path.join(process.cwd(), CONFIG.mail.templates.path),
+      {
+        autoescape: true,
+        noCache: !CONFIG.runningProd,
+        watch: !CONFIG.runningProd,
+      },
+    );
+  }
+
+  private initializeTransporter(): void {
+    this.transporter = createTransport({
       host: CONFIG.mail.host,
       port: CONFIG.mail.port,
       secure: CONFIG.runningProd && CONFIG.mail.port === 465,
@@ -26,61 +44,119 @@ class MailService {
             pass: CONFIG.mail.pass,
           }
         : undefined,
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      rateDelta: 1000,
+      rateLimit: 5,
     });
   }
 
-  async sendMail({
-    to,
-    subject,
-    text,
-    htmlTemplate,
-    templateData,
-    fromName,
-    fromEmail,
-  }: {
-    to: string;
-    subject: string;
-    text?: string;
-    htmlTemplate?: string;
-    templateData?: Record<string, any>;
-    fromName?: string;
-    fromEmail?: string;
-  }): Promise<SuccessResponseType<void> | ErrorResponseType> {
+  private async validateConnection(): Promise<void> {
     try {
-      let htmlContent;
-      if (htmlTemplate) {
-        htmlContent = nunjucks.render(
-          `${htmlTemplate}.html`,
-          templateData || {},
-        );
-      }
+      await this.transporter.verify();
+    } catch (error) {
+      throw new EmailError(
+        'Failed to connect to email server',
+        EmailErrorCode.PROVIDER_ERROR,
+        true,
+      );
+    }
+  }
+
+  private formatRecipient(recipient: string | IEmailRecipient): string {
+    if (typeof recipient === 'string') {
+      return recipient;
+    }
+    return recipient.name
+      ? `${recipient.name} <${recipient.email}>`
+      : recipient.email;
+  }
+
+  private formatRecipients(
+    recipients: string | IEmailRecipient | Array<string | IEmailRecipient>,
+  ): string {
+    if (Array.isArray(recipients)) {
+      return recipients.map((r) => this.formatRecipient(r)).join(', ');
+    }
+    return this.formatRecipient(recipients);
+  }
+
+  private async renderTemplate(
+    template: string,
+    data: ITemplateData,
+  ): Promise<IEmailTemplate> {
+    try {
+      const [subject, text, html] = await Promise.all([
+        this.templateEngine.render(`${template}/subject.njk`, data),
+        this.templateEngine.render(`${template}/text.njk`, data),
+        this.templateEngine.render(`${template}/html.njk`, data),
+      ]);
+
+      return { subject, text, html };
+    } catch (error) {
+      throw new EmailError(
+        `Failed to render template ${template}`,
+        EmailErrorCode.TEMPLATE_RENDERING_ERROR,
+        false,
+      );
+    }
+  }
+
+  public async sendMail(options: IEmailOptions): Promise<IEmailResponse> {
+    try {
+      await this.validateConnection();
+
+      const { subject, text, html } = await this.renderTemplate(
+        options.template,
+        options.data as ITemplateData,
+      );
 
       const mailOptions = {
-        from: `"${fromName || CONFIG.mail.fromName}" <${
-          fromEmail || CONFIG.mail.from
-        }>`,
-        to,
+        from: `"${CONFIG.mail.fromName}" <${CONFIG.mail.from}>`,
+        to: this.formatRecipients(options.to),
+        cc: options.cc ? this.formatRecipients(options.cc) : undefined,
+        bcc: options.bcc ? this.formatRecipients(options.bcc) : undefined,
+        replyTo: options.replyTo
+          ? this.formatRecipient(options.replyTo)
+          : undefined,
         subject,
         text,
-        html: htmlContent,
+        html,
+        attachments: options.attachments,
       };
 
-      await this.transporter.sendMail(mailOptions);
-      return { success: true };
-    } catch (error) {
-      LOGGER.error('Error sending email', error as Error);
+      const result = await this.transporter.sendMail(mailOptions);
+
       return {
-        success: false,
-        error: new ErrorResponse({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Failed to send email',
-          statusCode: 500,
-          suggestions: ['Please try again later.'],
-          originalError: error as Error,
-        }),
-      } as ErrorResponseType;
+        success: true,
+        messageId: result.messageId,
+      };
+    } catch (error) {
+      LOGGER.error('Error sending email', {
+        error,
+        template: options.template,
+        to: options.to,
+      });
+
+      if (error instanceof EmailError) {
+        throw error;
+      }
+
+      throw new EmailError(
+        'Failed to send email',
+        EmailErrorCode.PROVIDER_ERROR,
+        true,
+      );
     }
+  }
+
+  public static getInstance(): MailService {
+    if (!MailService.instance) {
+      MailService.instance = new MailService();
+    }
+    return MailService.instance;
   }
 }
 
-export default new MailService();
+export default MailService.getInstance();
