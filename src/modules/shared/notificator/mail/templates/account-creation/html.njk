@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to {{ appName }}!</h1>
+    
+    <p>Hello {{ name }},</p>
+    
+    <p>Your account has been successfully created with the email address: <strong>{{ email }}</strong>.</p>
+    
+    <p>To get started, please verify your email address by clicking the button below:</p>
+    
+    <a href="{{ verificationUrl }}" class="button">Verify Email Address</a>
+    
+    <p>Or copy and paste this link in your browser:</p>
+    <p style="word-break: break-all;">{{ verificationUrl }}</p>
+    
+    <p>If you did not create this account, please ignore this email.</p>
+    
+    <div class="footer">
+        <p>Best regards,<br>The {{ appName }} Team</p>
+    </div>
+</body>
+</html>
