@@ -6,7 +6,8 @@ import {
 import { AuthenticationStrategies } from 'modules/authz/authentication/strategies';
 import { OTPService, UserService } from 'modules/features/actions';
 import { IOTPModel } from 'modules/features/actions/otp/types';
-import { MailServiceUtilities } from 'modules/shared/notificator/mail';
+import EmailQueueService from 'modules/shared/queue/email/email.queue.service';
+import { EmailTemplate } from 'modules/shared/queue/email/types';
 
 class AuthService {
   async register(payload: any) {
@@ -47,16 +48,18 @@ class AuthService {
         otp: otpResponse.data.code,
       };
 
-      const mailResponse = await MailServiceUtilities.sendAccountCreationEmail({
+      const mailResponse = await EmailQueueService.addToQueue({
         to: email,
+        template: EmailTemplate.ACCOUNT_CREATION,
         data: mailData,
       });
 
       if (!mailResponse.success) {
-        LOGGER.error('Failed to send verification email', mailResponse.error);
+        LOGGER.error('Failed to queue verification email', mailResponse.error);
         throw new ErrorResponse({
-          code: 'EMAIL_DELIVERY_ERROR',
-          message: 'Failed to send verification email. Please try again later.',
+          code: 'EMAIL_QUEUE_ERROR',
+          message:
+            'Failed to queue verification email. Please try again later.',
           statusCode: 500,
           originalError: mailResponse.error,
         });
