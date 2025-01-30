@@ -1,4 +1,4 @@
-import { EmailTemplate } from '../../queue/email/types';
+import { EmailTemplate } from './templates';
 
 export interface IEmailAttachment {
   filename: string;
@@ -35,11 +35,6 @@ export interface IEmailTemplate {
   subject: string;
   text: string;
   html: string;
-}
-
-export interface IEmailProvider {
-  sendMail(options: IEmailOptions): Promise<IEmailResponse>;
-  verifyConnection(): Promise<boolean>;
 }
 
 export class EmailError extends Error {
