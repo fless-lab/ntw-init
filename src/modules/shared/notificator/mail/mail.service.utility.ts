@@ -49,6 +49,7 @@ class MailServiceUtilities {
         code,
         purpose: otpPurpose.message,
         expiresIn: CONFIG.otp.expiration / 60000,
+        appName: CONFIG.app,
       },
     });
   }
@@ -61,7 +62,7 @@ class MailServiceUtilities {
     data: {
       name: string;
       email: string;
-      verificationUrl: string;
+      code: string;
     };
   }): Promise<IEmailResponse> {
     return await this.sendMail({
@@ -70,6 +71,8 @@ class MailServiceUtilities {
       data: {
         subject: 'Welcome to Our Service',
         ...data,
+        appName: CONFIG.app,
+        expiresIn: CONFIG.otp.expiration / 60000,
       },
     });
   }
@@ -81,8 +84,7 @@ class MailServiceUtilities {
     to: string;
     data: {
       name: string;
-      resetUrl: string;
-      expiresIn: number;
+      code: string;
     };
   }): Promise<IEmailResponse> {
     return await this.sendMail({
@@ -91,6 +93,8 @@ class MailServiceUtilities {
       data: {
         subject: 'Reset Your Password',
         ...data,
+        appName: CONFIG.app,
+        expiresIn: CONFIG.otp.expiration / 60000,
       },
     });
   }
@@ -102,8 +106,7 @@ class MailServiceUtilities {
     to: string;
     data: {
       name: string;
-      verificationUrl: string;
-      expiresIn: number;
+      code: string;
     };
   }): Promise<IEmailResponse> {
     return await this.sendMail({
@@ -112,6 +115,8 @@ class MailServiceUtilities {
       data: {
         subject: 'Verify Your Email',
         ...data,
+        appName: CONFIG.app,
+        expiresIn: CONFIG.otp.expiration / 60000,
       },
     });
   }
