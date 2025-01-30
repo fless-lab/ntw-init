@@ -87,10 +87,15 @@ class MailService {
     data: ITemplateData,
   ): Promise<IEmailTemplate> {
     try {
+      const enrichedData = {
+        ...data,
+        appName: CONFIG.app,
+        expiresIn: Math.floor(CONFIG.otp.expiration / 60000), // Converted to minutes
+      };
       const [subject, text, html] = await Promise.all([
-        this.templateEngine.render(`${template}/subject.njk`, data),
-        this.templateEngine.render(`${template}/text.njk`, data),
-        this.templateEngine.render(`${template}/html.njk`, data),
+        this.templateEngine.render(`${template}/subject.njk`, enrichedData),
+        this.templateEngine.render(`${template}/text.njk`, enrichedData),
+        this.templateEngine.render(`${template}/html.njk`, enrichedData),
       ]);
 
       return { subject, text, html };
@@ -106,12 +111,14 @@ class MailService {
   public async sendMail(options: IEmailOptions): Promise<IEmailResponse> {
     try {
       await this.validateConnection();
-
+      console.log('options', options);
       const { subject, text, html } = await this.renderTemplate(
         options.template,
         options.data as ITemplateData,
       );
-
+      console.log('subject', subject);
+      console.log('text', text);
+      console.log('html', html);
       const mailOptions = {
         from: `"${CONFIG.mail.fromName}" <${CONFIG.mail.from}>`,
         to: this.formatRecipients(options.to),
@@ -125,7 +132,7 @@ class MailService {
         html,
         attachments: options.attachments,
       };
-
+      console.log('mailOptions', mailOptions);
       const result = await this.transporter.sendMail(mailOptions);
 
       return {
