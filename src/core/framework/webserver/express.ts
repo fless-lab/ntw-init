@@ -40,7 +40,7 @@ initializeSessionAndFlash;
 initializeViewEngine;
 
 // Client authentication middleware
-app.use(AuthMiddlewares.enableClientAuth);
+// app.use(AuthMiddlewares.enableClientAuth);
 
 // Client authentication middleware
 app.use(SharedMiddlewares.enableRateLimiter);
