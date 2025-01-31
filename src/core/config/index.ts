@@ -23,6 +23,7 @@ export interface Config {
   rate: {
     limit: number;
     max: number;
+    excludePaths: string[];
   };
   bruteForce: {
     freeRetries: number;
@@ -176,6 +177,9 @@ export class ConfigService {
       rate: {
         limit: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000', 10), // 15 minutes in milliseconds
         max: parseInt(process.env.RATE_LIMIT_MAX || '100', 10),
+        excludePaths: (
+          process.env.RATE_LIMIT_EXCLUDE_PATHS || '/checker/admin/queues'
+        ).split(','),
       },
       bruteForce: {
         freeRetries: parseInt(process.env.BRUTE_FORCE_FREE_RETRIES || '5', 10),
@@ -289,7 +293,7 @@ export class ConfigService {
           },
           monitoring: {
             checkInterval: parseInt(
-              process.env.EMAIL_QUEUE_CHECK_INTERVAL || '30000',
+              process.env.EMAIL_QUEUE_CHECK_INTERVAL || '300000',
               10,
             ),
             maxStallCount: parseInt(
